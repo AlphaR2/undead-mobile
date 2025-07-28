@@ -9,9 +9,10 @@ import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-
+import "../global.css";
 // Theme provider
 import { ThemeProvider } from "./providers/ThemeProvider";
+import ContextProvider from "@/Context/Context";
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -44,51 +45,53 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        {/* <PrivyProvider
+      <ContextProvider>
+        <SafeAreaProvider>
+          {/* <PrivyProvider
           appId={Constants.expoConfig?.extra?.privyAppId}
           clientId={Constants.expoConfig?.extra?.privyClientId}
         > */}
-        <ThemeProvider>
-          <ErrorBoundary>
-            <Stack screenOptions={{ headerShown: false }}>
-              {/* Splash screen (entry point) */}
-              <Stack.Screen
-                name="index"
-                options={{
-                  gestureEnabled: false,
-                  animation: "none",
-                }}
+          <ThemeProvider>
+            <ErrorBoundary>
+              <Stack screenOptions={{ headerShown: false }}>
+                {/* Splash screen (entry point) */}
+                <Stack.Screen
+                  name="index"
+                  options={{
+                    gestureEnabled: false,
+                    animation: "none",
+                  }}
+                />
+                {/* Onboarding flow */}
+                <Stack.Screen
+                  name="trailer"
+                  options={{
+                    gestureEnabled: false,
+                    animation: "fade",
+                    presentation: "fullScreenModal",
+                  }}
+                />
+                <Stack.Screen name="intro" />
+                <Stack.Screen name="guide" />
+                <Stack.Screen name="warrior-creation" />
+                {/* Main app tabs */}
+                <Stack.Screen name="(tabs)" />
+                {/* 404 page */}
+                <Stack.Screen name="+not-found" />
+              </Stack>
+              <StatusBar
+                style="light"
+                backgroundColor="#000000"
+                translucent={false}
               />
-              {/* Onboarding flow */}
-              <Stack.Screen
-                name="trailer"
-                options={{
-                  gestureEnabled: false,
-                  animation: "fade",
-                  presentation: "fullScreenModal",
-                }}
-              />
-              <Stack.Screen name="intro" />
-              <Stack.Screen name="guide" />
-              <Stack.Screen name="warrior-creation" />
-              {/* Main app tabs */}
-              <Stack.Screen name="(tabs)" />
-              {/* 404 page */}
-              <Stack.Screen name="+not-found" />
-            </Stack>
-            <StatusBar
-              style="light"
-              backgroundColor="#000000"
-              translucent={false}
-            />
 
-            {/* Global toast notifications */}
-            <Toast />
-          </ErrorBoundary>
-        </ThemeProvider>
-        {/* </PrivyProvider> */}
-      </SafeAreaProvider>
+              {/* Global toast notifications */}
+              <Toast />
+            </ErrorBoundary>
+          </ThemeProvider>
+          {/* </PrivyProvider> */}
+        </SafeAreaProvider>
+      </ContextProvider>
     </GestureHandlerRootView>
   );
 }

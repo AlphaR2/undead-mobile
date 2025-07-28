@@ -1,19 +1,23 @@
+import { CreateContext } from "@/Context/Context";
+import ChooseName from "@/components/ChooseName";
+import GameCardCarousel from "@/components/GameCard/GameCardCarousel";
+import GameCardIntro from "@/components/GameCard/Intro";
+import CharacterCarousel from "@/components/GuideCarousel";
+import WarriorProfileSetup from "@/components/warrior/WarriorProfileSetup";
 import { GameFonts } from "@/constants/GameFonts";
 import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Animated,
   Dimensions,
   ImageBackground,
   SafeAreaView,
-  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 //bg
 const WELCOME_BACKGROUND =
@@ -77,10 +81,11 @@ const GUIDES = [
   },
 ];
 
-const GuideSelection: React.FC = () => {
-  const [currentScreen, setCurrentScreen] = useState<"welcome" | "selection">(
-    "welcome"
-  );
+const GuideSelection = () => {
+  const { currentOnboardingScreen, setCurrentOnboardingScreen } =
+    useContext(CreateContext).onboarding;
+
+  console.log(currentOnboardingScreen);
   const [selectedGuide, setSelectedGuide] = useState(0);
   const [fadeAnim] = useState(new Animated.Value(0));
   const [slideAnim] = useState(new Animated.Value(50));
@@ -93,10 +98,10 @@ const GuideSelection: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (currentScreen === "selection") {
+    if (currentOnboardingScreen === "selection") {
       startSelectionAnimation();
     }
-  }, [currentScreen]);
+  }, [currentOnboardingScreen]);
 
   const startWelcomeAnimation = () => {
     fadeAnim.setValue(1);
@@ -134,7 +139,7 @@ const GuideSelection: React.FC = () => {
   };
 
   const handleNext = () => {
-    setCurrentScreen("selection");
+    setCurrentOnboardingScreen("selection");
   };
 
   const handleGuideSelect = (index: number) => {
@@ -208,133 +213,76 @@ const GuideSelection: React.FC = () => {
         style={styles.backgroundImage}
         resizeMode="contain"
       >
-        <View style={styles.overlay} />
-
         <SafeAreaView style={styles.content}>
-          <Animated.View
-            style={[
-              styles.selectionHeader,
-              {
-                opacity: fadeAnim,
-                transform: [{ translateY: slideAnim }],
-              },
-            ]}
-          >
-            <Text style={[styles.headerTitle, GameFonts.subtitle]}>
-              Select a tour guide
-            </Text>
-          </Animated.View>
+          <View className="flex-1 items-end justify-end text-center">
+            <Animated.View
+              style={[
+                styles.selectionHeader,
+                {
+                  opacity: fadeAnim,
+                  transform: [{ translateY: slideAnim }],
+                },
+              ]}
+              className="border border-red-400"
+            >
+              <Text className="text-center">Select a tour guide</Text>
+            </Animated.View>
 
-          <Animated.View
-            style={[
-              styles.selectionContent,
-              {
-                opacity: fadeAnim,
-              },
-            ]}
-          >
-            {/* Guide Carousel */}
-            <View style={styles.carouselContainer}>
-              <ScrollView
-                horizontal
-                pagingEnabled
-                showsHorizontalScrollIndicator={false}
-                onMomentumScrollEnd={(e) => {
-                  const index = Math.round(
-                    e.nativeEvent.contentOffset.x / SCREEN_WIDTH
-                  );
-                  setSelectedGuide(index);
-                }}
-                style={styles.carousel}
-              >
-                {GUIDES.map((guide, index) => (
-                  <TouchableOpacity
-                    key={guide.id}
-                    style={styles.guideCard}
-                    onPress={() => handleGuideSelect(index)}
-                    activeOpacity={0.9}
-                  >
-                    <View
-                      style={[styles.guideAvatar, { borderColor: guide.color }]}
-                    >
-                      <Text
-                        style={[
-                          styles.guideInitial,
-                          GameFonts.title,
-                          { color: guide.color },
-                        ]}
-                      >
-                        {guide.name.charAt(0)}
-                      </Text>
-                    </View>
-                    <Text style={[styles.guideName, GameFonts.epic]}>
-                      {guide.name}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-
-            {/* Guide Details Panel */}
-            <View style={styles.detailsPanel}>
-              <View
-                style={[
-                  styles.detailsCard,
-                  { borderColor: GUIDES[selectedGuide].color },
-                ]}
-              >
-                <Text style={[styles.detailsTitle, GameFonts.subtitle]}>
-                  {GUIDES[selectedGuide].name}
-                </Text>
-                <Text
-                  style={[
-                    styles.detailsType,
-                    GameFonts.bodyMedium,
-                    { color: GUIDES[selectedGuide].color },
-                  ]}
-                >
-                  ({GUIDES[selectedGuide].type})
-                </Text>
-
-                <Text style={[styles.detailsDescription, GameFonts.body]}>
-                  "{GUIDES[selectedGuide].description}"
-                </Text>
-
-                <Text style={[styles.detailsLabel, GameFonts.bodySemiBold]}>
-                  Recommended for:
-                </Text>
-                <Text style={[styles.detailsValue, GameFonts.body]}>
-                  {GUIDES[selectedGuide].recommendedFor}
-                </Text>
-              </View>
-
-              {/* Button moved inside details panel for closer positioning */}
-              <Animated.View
-                style={[styles.buttonContainer, { opacity: fadeAnim }]}
-              >
-                <TouchableOpacity
-                  style={[
-                    styles.confirmButton,
-                    { borderColor: GUIDES[selectedGuide].color },
-                  ]}
-                  onPress={handleConfirm}
-                  activeOpacity={0.85}
-                >
-                  <Text style={[styles.buttonText, GameFonts.button]}>
-                    CONFIRM GUIDE
-                  </Text>
-                </TouchableOpacity>
-              </Animated.View>
-            </View>
-          </Animated.View>
+            <CharacterCarousel />
+          </View>
         </SafeAreaView>
       </ImageBackground>
     </View>
   );
 
-  return currentScreen === "welcome"
+  const renderInputScreen = () => {
+    return (
+      <View style={styles.container}>
+        <StatusBar hidden />
+        <ImageBackground
+          source={{ uri: SELECTION_BACKGROUND }}
+          style={styles.backgroundImage}
+          resizeMode="contain"
+          className=""
+        >
+          <SafeAreaView style={styles.content}>
+            <Animated.View
+              style={[
+                styles.selectionHeader,
+                {
+                  opacity: fadeAnim,
+                  transform: [{ translateY: slideAnim }],
+                },
+              ]}
+            ></Animated.View>
+
+            <ChooseName />
+          </SafeAreaView>
+        </ImageBackground>
+      </View>
+    );
+  };
+  const renderGameCardIntroScreen = () => {
+    return <GameCardIntro />;
+  };
+  const renderGameCardCarouselScreen = () => {
+    return <GameCardCarousel />;
+  };
+  const renderWarriorProfileSetupScreen = () => {
+    return <WarriorProfileSetup />;
+  };
+
+  return currentOnboardingScreen === "welcome"
     ? renderWelcomeScreen()
-    : renderSelectionScreen();
+    : currentOnboardingScreen === "selection"
+      ? renderSelectionScreen()
+      : currentOnboardingScreen === "name"
+        ? renderInputScreen()
+        : currentOnboardingScreen === "game-card-intro"
+          ? renderGameCardIntroScreen()
+          : currentOnboardingScreen === "game-card-carousel"
+            ? renderGameCardCarouselScreen()
+            : renderWarriorProfileSetupScreen();
 };
 
 const styles = StyleSheet.create({
@@ -352,7 +300,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: 2,
   },
 
   // Welcome Screen Styles
@@ -401,7 +349,7 @@ const styles = StyleSheet.create({
   // Selection Screen Styles
   selectionHeader: {
     alignItems: "center",
-    paddingVertical: 20,
+    paddingVertical: 5,
   },
   headerTitle: {
     fontSize: 24,
