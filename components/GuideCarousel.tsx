@@ -172,6 +172,7 @@ const CharacterCarousel: React.FC = () => {
             ))}
           </View>
 
+
           <TouchableOpacity
             style={[styles.navButton, styles.rightArrow]}
             onPress={handleNext}
