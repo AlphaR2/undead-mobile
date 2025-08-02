@@ -7,8 +7,10 @@ import {
   ImageBackground,
 } from "react-native";
 import React, { useState } from "react";
+import { useRouter } from "expo-router";
 
 const WarriorProfileSetup = () => {
+  const router = useRouter();
   const [warriorName, setWarriorName] = useState("");
   return (
     <View className="flex-1 px-5">
@@ -93,10 +95,11 @@ const WarriorProfileSetup = () => {
                 uri: "https://res.cloudinary.com/deensvquc/image/upload/v1753446242/button-bg_lwqals.png",
               }}
               className="w-20 pt-4"
+              
             >
               <TouchableOpacity
-                // onPress={handleContinue}
-                disabled={!warriorName.trim()}
+                onPress={()=> {router.push("/dashboard"), console.log("pop")}}
+                // disabled={!warriorName.trim()}
                 className={`px-8 py-3 rounded-xl w-full pt-4`}
               >
                 <Text
