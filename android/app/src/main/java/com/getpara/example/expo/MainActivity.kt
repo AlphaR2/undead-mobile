@@ -1,4 +1,4 @@
-package com.alphar33.rustundeadmobile
+package com.getpara.example.expo
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build
