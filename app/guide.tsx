@@ -213,21 +213,9 @@ const GuideSelection = () => {
         style={styles.backgroundImage}
         resizeMode="contain"
       >
+        <View style={styles.overlay} />
         <SafeAreaView style={styles.content}>
           <View className="flex-1 items-end justify-end text-center">
-            <Animated.View
-              style={[
-                styles.selectionHeader,
-                {
-                  opacity: fadeAnim,
-                  transform: [{ translateY: slideAnim }],
-                },
-              ]}
-              className="border border-red-400"
-            >
-              <Text className="text-center">Select a tour guide</Text>
-            </Animated.View>
-
             <CharacterCarousel />
           </View>
         </SafeAreaView>
@@ -296,7 +284,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
   },
   content: {
     flex: 1,
@@ -312,13 +300,13 @@ const styles = StyleSheet.create({
   welcomeContainer: {
     alignItems: "center",
     paddingHorizontal: 2,
-    marginBottom: 30, // Reduced space between text and button
+    marginBottom: 30,
   },
   titleContainer: {
     marginBottom: 20,
   },
   welcomeTitle: {
-    fontSize: 35,
+    fontSize: 30,
     color: "#cd7f32",
     textAlign: "center",
     textShadowColor: "#000",
@@ -340,7 +328,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   welcomeText: {
-    fontSize: 16,
+    fontSize: 14,
     color: "#E0E0E0",
     textAlign: "center",
     lineHeight: 24,
@@ -352,7 +340,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 20,
     color: "#E0E0E0",
     textAlign: "center",
   },
@@ -402,7 +390,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     padding: 20,
     marginHorizontal: 10,
-    marginBottom: 20, // Space for button below
+    marginBottom: 20,
   },
   detailsTitle: {
     fontSize: 20,
@@ -437,7 +425,7 @@ const styles = StyleSheet.create({
   // Buttons
   buttonContainer: {
     alignItems: "center",
-    paddingVertical: 10, // Reduced padding
+    paddingVertical: 10,
   },
   nextButton: {
     backgroundColor: "#121212",

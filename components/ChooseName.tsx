@@ -1,15 +1,14 @@
-import React, { useState, useContext } from "react";
+import { CreateContext } from "@/Context/Context";
+import React, { useContext, useState } from "react";
 import {
-  View,
+  Dimensions,
+  ImageBackground,
   Text,
   TextInput,
   TouchableOpacity,
-  Image,
-  ImageBackground,
-  Dimensions,
+  View,
 } from "react-native";
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
-import { CreateContext } from "@/Context/Context";
 
 interface CharacterIntroductionProps {
   character?: {
@@ -29,10 +28,10 @@ const ChooseName = () => {
       greeting:
         "Greetings, traveler. I am Valdor, and I shall be your guide through the mysteries of Solana. But first, tell me - what shall I call you on this journey?",
     },
-    // onContinue
   };
   const [playerName, setPlayerName] = useState("");
   const { setCurrentOnboardingScreen } = useContext(CreateContext).onboarding;
+
   const handleContinue = () => {
     if (playerName.trim()) {
       setCurrentOnboardingScreen("game-card-intro");
@@ -41,93 +40,72 @@ const ChooseName = () => {
   };
 
   return (
-    <View
-      className={`flex-1 relative items-center justify-center max-h-${SCREEN_HEIGHT}`}
-    >
-      {/* Background */}
-      <View className="flex-1">
-        {/* Dark overlay */}
+    <View className="flex-1 items-center justify-center px-8">
+      {/* Centered Dialog Card */}
+      <View className="w-full max-w-md">
+        <ImageBackground
+          source={{
+            uri: "https://res.cloudinary.com/deensvquc/image/upload/v1753443982/Subtract_udkdcx.png",
+          }}
+          resizeMode="contain"
+          className="w-full"
+        >
+          {/* Dialog content */}
+          <View className="min-h-96 gap-y-8 flex items-center justify-center px-6 py-8">
+            {/* Character's greeting */}
+            <Text className="text-white text-base leading-6 text-center">
+              {player.character.greeting}
+            </Text>
 
-        {/* Main Content */}
-        <View className="flex-1 flex-row items-start justify-between px-16  border-red-400">
-          {/* Left Side - Character Image */}
-          <View className="w-2/5 items-start flex ">
-            <Image
-              source={{ uri: player.character.image }}
-              className="w-80 h-96 rounded-2xl"
-              resizeMode="contain"
-            />
-          </View>
-
-          {/* Right Side - Dialog Box */}
-          <View className="w-[65%] flex pl-8 py-auto  h-[70%] px-4  items-center justify-center">
-            {/* Ornate Dialog Box */}
-            <View className="relative  h-full">
-              {/* Main dialog container with ornate border effect */}
+            {/* Name input section */}
+            <View className="flex items-center gap-y-4 w-full">
+              {/* Text input */}
               <ImageBackground
                 source={{
-                  uri: "https://res.cloudinary.com/deensvquc/image/upload/v1753443982/Subtract_udkdcx.png",
+                  uri: "https://res.cloudinary.com/deensvquc/image/upload/v1753446388/input-bg_vibbma.png",
                 }}
-                resizeMode="contain"
-                className="bg-amber-800 rounded-2xl border-4 border-yellow-500  h-full w-full relative"
+                className="w-full"
+                resizeMode="stretch"
               >
-                {/* Corner decorations */}
+                <TextInput
+                  value={playerName}
+                  onChangeText={setPlayerName}
+                  placeholder="Enter a name"
+                  placeholderTextColor="#D4AF37"
+                  className="w-full px-6 py-4 bg-transparent text-white text-center text-lg"
+                  style={{
+                    fontFamily: "System",
+                    fontSize: 16,
+                  }}
+                  maxLength={20}
+                />
+              </ImageBackground>
 
-                {/* Dialog content */}
-                <View className="min-h-full gap-y-8 flex items-center justify-center px-4 py-4">
-                  {/* Character's greeting */}
-                  <Text className="text-white text-sm leading-  text-center">
-                    {player.character.greeting}
+              {/* Continue button */}
+              <ImageBackground
+                source={{
+                  uri: "https://res.cloudinary.com/deensvquc/image/upload/v1753446242/button-bg_lwqals.png",
+                }}
+                className="w-48"
+                resizeMode="stretch"
+              >
+                <TouchableOpacity
+                  onPress={handleContinue}
+                  disabled={!playerName.trim()}
+                  className="px-8 py-4 items-center justify-center"
+                >
+                  <Text
+                    className={`text-center font-bold text-lg ${
+                      playerName.trim() ? "text-white" : "text-gray-300"
+                    }`}
+                  >
+                    Continue
                   </Text>
-
-                  {/* Name input section */}
-                  <View className="flex items-center gap-y-2">
-                    {/* Text input */}
-                    <ImageBackground
-                      source={{
-                        uri: "https://res.cloudinary.com/deensvquc/image/upload/v1753446388/input-bg_vibbma.png",
-                      }}
-                    >
-                      <TextInput
-                        value={playerName}
-                        onChangeText={setPlayerName}
-                        placeholder="Enter a name"
-                        placeholderTextColor="#D4AF37"
-                        className="w-80 px-4 py-2 bg-transparent rounded-xl text-white text-center text-lg"
-                        style={{
-                          fontFamily: "System",
-                          fontSize: 16,
-                        }}
-                        maxLength={20}
-                      />
-                    </ImageBackground>
-
-                    {/* Continue button */}
-                    <ImageBackground
-                      source={{
-                        uri: "https://res.cloudinary.com/deensvquc/image/upload/v1753446242/button-bg_lwqals.png",
-                      }}
-                    >
-                      <TouchableOpacity
-                        onPress={handleContinue}
-                        disabled={!playerName.trim()}
-                        className={`px-8 py-3 rounded-xl min-w-32 `}
-                      >
-                        <Text
-                          className={`text-center font-bold text-lg ${
-                            playerName.trim() ? "text-white" : "text-gray-300"
-                          }`}
-                        >
-                          Continue
-                        </Text>
-                      </TouchableOpacity>
-                    </ImageBackground>
-                  </View>
-                </View>
+                </TouchableOpacity>
               </ImageBackground>
             </View>
           </View>
-        </View>
+        </ImageBackground>
       </View>
     </View>
   );
