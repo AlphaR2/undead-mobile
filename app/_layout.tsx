@@ -1,6 +1,6 @@
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { Toast } from "@/components/ui/Toast";
-// import { PrivyProvider } from "@privy-io/expo";
+import { dynamicClient } from "@/context/wallet";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -11,8 +11,9 @@ import "react-native-reanimated";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "../global.css";
 // Theme provider
+import ContextProvider from "@/context/Context";
+import { View, StyleSheet } from "react-native";
 import { ThemeProvider } from "./providers/ThemeProvider";
-import ContextProvider from "@/Context/Context";
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -44,54 +45,77 @@ export default function RootLayout() {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <ContextProvider>
-        <SafeAreaProvider>
-          {/* <PrivyProvider
-          appId={Constants.expoConfig?.extra?.privyAppId}
-          clientId={Constants.expoConfig?.extra?.privyClientId}
-        > */}
-          <ThemeProvider>
-            <ErrorBoundary>
-              <Stack screenOptions={{ headerShown: false }}>
-                {/* Splash screen (entry point) */}
-                <Stack.Screen
-                  name="index"
-                  options={{
-                    gestureEnabled: false,
-                    animation: "none",
-                  }}
+    <View style={styles.container}>
+      <View style={styles.webViewContainer}>
+        <dynamicClient.reactNative.WebView />
+      </View>
+      
+      {/* Main App Content */}
+      <GestureHandlerRootView style={styles.appContainer}>
+        <ContextProvider>
+          <SafeAreaProvider>
+            <ThemeProvider>
+              <ErrorBoundary>
+                <Stack screenOptions={{ headerShown: false }}>
+                  {/* Splash screen (entry point) */}
+                  <Stack.Screen
+                    name="index"
+                    options={{
+                      gestureEnabled: false,
+                      animation: "none",
+                    }}
+                  />
+                  {/* Onboarding flow */}
+                  <Stack.Screen
+                    name="trailer"
+                    options={{
+                      gestureEnabled: false,
+                      animation: "fade",
+                      presentation: "fullScreenModal",
+                    }}
+                  />
+                  {/* wallet connect will be in intro */}
+                  <Stack.Screen name="intro" />
+                  <Stack.Screen name="guide" />
+                  <Stack.Screen name="warrior-creation" />
+                  {/* Main app tabs */}
+                  <Stack.Screen name="(tabs)" />
+                  {/* 404 page */}
+                  <Stack.Screen name="+not-found" />
+                </Stack>
+                <StatusBar
+                  style="light"
+                  backgroundColor="#000000"
+                  translucent={false}
                 />
-                {/* Onboarding flow */}
-                <Stack.Screen
-                  name="trailer"
-                  options={{
-                    gestureEnabled: false,
-                    animation: "fade",
-                    presentation: "fullScreenModal",
-                  }}
-                />
-                <Stack.Screen name="intro" />
-                <Stack.Screen name="guide" />
-                <Stack.Screen name="warrior-creation" />
-                {/* Main app tabs */}
-                <Stack.Screen name="(tabs)" />
-                {/* 404 page */}
-                <Stack.Screen name="+not-found" />
-              </Stack>
-              <StatusBar
-                style="light"
-                backgroundColor="#000000"
-                translucent={false}
-              />
-
-              {/* Global toast notifications */}
-              <Toast />
-            </ErrorBoundary>
-          </ThemeProvider>
-          {/* </PrivyProvider> */}
-        </SafeAreaProvider>
-      </ContextProvider>
-    </GestureHandlerRootView>
+                
+                {/* Global toast notifications */}
+                <Toast />
+              </ErrorBoundary>
+            </ThemeProvider>
+          </SafeAreaProvider>
+        </ContextProvider>
+      </GestureHandlerRootView>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    position: 'relative',
+  },
+  webViewContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: -1, // Behind everything
+    opacity: 0, // Make it invisible but functional
+  },
+  appContainer: {
+    flex: 1,
+    zIndex: 1, // Above the WebView
+  },
+});

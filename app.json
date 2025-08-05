@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "rust-undead-mobile",
-    "slug": "rust-undead-mobile",
+    "name": "Rust Undead",
+    "slug": "Rust Undead",
     "version": "1.0.0",
     "orientation": "landscape",
     "icon": "./assets/images/ru.png",
-    "scheme": "rustundeadmobile",
+    "scheme": "rustundead",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -17,7 +17,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.alphar33.rustundeadmobile"
+      "package": "com.alphar33.rustundead"
     },
     "web": {
       "bundler": "metro",

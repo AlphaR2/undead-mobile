@@ -9,7 +9,7 @@ import {
   Dimensions,
 } from "react-native";
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
-import { CreateContext } from "@/Context/Context";
+import { CreateContext } from "@/context/Context";
 
 interface CharacterIntroductionProps {
   character?: {

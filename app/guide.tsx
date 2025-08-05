@@ -1,4 +1,4 @@
-import { CreateContext } from "@/Context/Context";
+import { CreateContext } from "@/context/Context";
 import ChooseName from "@/components/ChooseName";
 import GameCardCarousel from "@/components/GameCard/GameCardCarousel";
 import GameCardIntro from "@/components/GameCard/Intro";
