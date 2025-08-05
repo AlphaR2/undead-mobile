@@ -29,10 +29,7 @@ export interface UndelegationStates {
 }
 
 type UndeadProgram = Program<UndeadTypes>;
-/**
- * Professional undelegation hook for managing delegated warriors and battle rooms
- * Simplified approach: direct warrior undelegation with warrior PDA + room ID
- */
+
 export const useUndelegation = () => {
   const program = useUndeadProgram();
   const magicBlockProvider = useMagicBlockProvider();

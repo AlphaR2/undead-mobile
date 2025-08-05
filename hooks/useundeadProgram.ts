@@ -15,7 +15,7 @@ import { PROGRAM_ID, PROGRAM_IDL, authority } from "../config/program";
 type UndeadProgram = Program<UndeadTypes>;
 
 // ===============================================================================
-// TYPES & INTERFACES
+// TYPES & INTERFACES FOR PROGRAM
 // ===============================================================================
 
 interface WalletInfo {
