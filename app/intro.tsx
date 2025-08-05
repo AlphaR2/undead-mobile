@@ -1,6 +1,6 @@
 import { useToast } from "@/components/modal/Toast";
 import { GameFonts } from "@/constants/GameFonts";
-import { useDynamic } from "@/Context/wallet";
+import { useDynamic } from "@/context/wallet";
 import { router } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {

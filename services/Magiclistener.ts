@@ -1,4 +1,4 @@
-import { RustUndead as UndeadTypes } from "@/types/idltypes";
+import { RustUndead as UndeadTypes } from "@/types/idlTypes";
 import * as anchor from "@coral-xyz/anchor";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { PROGRAM_IDL } from "../config/program";

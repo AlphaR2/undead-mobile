@@ -1,5 +1,5 @@
 import { authority } from "@/config/program";
-import { RustUndead as UndeadTypes } from "@/types/idltypes";
+import { RustUndead as UndeadTypes } from "@/types/idlTypes";
 import {
   ImageRarity,
   UserPersona,

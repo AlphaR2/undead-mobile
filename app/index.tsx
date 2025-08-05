@@ -1,4 +1,4 @@
-import { useDynamic } from "@/Context/wallet";
+import { useDynamic } from "@/context/wallet";
 import { router } from "expo-router";
 import React, { useEffect } from "react";
 import { Image, StatusBar, StyleSheet, View } from "react-native";

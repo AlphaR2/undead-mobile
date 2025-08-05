@@ -1,6 +1,6 @@
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { Toast } from "@/components/ui/Toast";
-import { dynamicClient } from "@/Context/wallet";
+import { dynamicClient } from "@/context/wallet";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -11,7 +11,7 @@ import "react-native-reanimated";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "../global.css";
 // Theme provider
-import ContextProvider from "@/Context/Context";
+import ContextProvider from "@/context/Context";
 import { View } from "react-native";
 import { ThemeProvider } from "./providers/ThemeProvider";
 

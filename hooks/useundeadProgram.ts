@@ -1,4 +1,4 @@
-import { RustUndead as UndeadTypes } from "@/types/idltypes";
+import { RustUndead as UndeadTypes } from "@/types/idlTypes";
 import { AnchorProvider, Program } from "@coral-xyz/anchor";
 import { useDynamicContext, useIsLoggedIn } from "@dynamic-labs/sdk-react-core";
 import { ISolana, isSolanaWallet } from "@dynamic-labs/solana-core";

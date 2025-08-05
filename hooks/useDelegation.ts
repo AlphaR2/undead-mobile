@@ -1,5 +1,5 @@
 "use client";
-import { RustUndead as UndeadTypes } from "@/types/idltypes";
+import { RustUndead as UndeadTypes } from "@/types/idlTypes";
 import { Program } from "@coral-xyz/anchor";
 import { PublicKey } from "@solana/web3.js";
 import { useCallback, useState } from "react";
