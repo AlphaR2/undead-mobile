@@ -3,6 +3,7 @@ import ChooseName from "@/components/ChooseName";
 import GameCardCarousel from "@/components/GameCard/GameCardCarousel";
 import GameCardIntro from "@/components/GameCard/Intro";
 import CharacterCarousel from "@/components/GuideCarousel";
+import PersonaSelectionScreen from "@/components/Persona";
 import WarriorProfileSetup from "@/components/warrior/WarriorProfileSetup";
 import { GameFonts } from "@/constants/GameFonts";
 import { router } from "expo-router";
@@ -205,7 +206,7 @@ const GuideSelection = () => {
     </View>
   );
 
-  const renderSelectionScreen = () => (
+  const renderGuideSelection = () => (
     <View style={styles.container}>
       <StatusBar hidden />
       <ImageBackground
@@ -214,7 +215,7 @@ const GuideSelection = () => {
         resizeMode="contain"
       >
         <SafeAreaView style={styles.content}>
-          <View className="flex-1 items-end justify-end text-center">
+          <View className="flex-1  text-center">
             <Animated.View
               style={[
                 styles.selectionHeader,
@@ -225,7 +226,9 @@ const GuideSelection = () => {
               ]}
               className="border border-red-400"
             >
-              <Text className="text-center">Select a tour guide</Text>
+              <Text className="text-center text-white">
+                Select a tour guide
+              </Text>
             </Animated.View>
 
             <CharacterCarousel />
@@ -234,6 +237,13 @@ const GuideSelection = () => {
       </ImageBackground>
     </View>
   );
+  const renderPersonaScreen = () => {
+    return (
+      <View style={styles.container}>
+        <PersonaSelectionScreen />
+      </View>
+    );
+  };
 
   const renderInputScreen = () => {
     return (
@@ -269,20 +279,37 @@ const GuideSelection = () => {
     return <GameCardCarousel />;
   };
   const renderWarriorProfileSetupScreen = () => {
-    return <WarriorProfileSetup />;
+    return (
+      <ImageBackground
+        source={{
+          uri: "https://sapphire-geographical-goat-695.mypinata.cloud/ipfs/bafybeiaqhe26zritbjrhf7vaocixy22ep2ejxx6rawqlonjlqskywqcobu",
+        }}
+        resizeMode="cover"
+        className="w-full  z-40"
+        style={{
+          height: SCREEN_HEIGHT * 1.3, // Use style prop for dynamic height
+          width: "100%",
+        }}
+      >
+        <View className="absolute inset-0 bg-black opacity-50"></View>
+        <WarriorProfileSetup />
+      </ImageBackground>
+    );
   };
 
   return currentOnboardingScreen === "welcome"
     ? renderWelcomeScreen()
     : currentOnboardingScreen === "selection"
-      ? renderSelectionScreen()
-      : currentOnboardingScreen === "name"
-        ? renderInputScreen()
-        : currentOnboardingScreen === "game-card-intro"
-          ? renderGameCardIntroScreen()
-          : currentOnboardingScreen === "game-card-carousel"
-            ? renderGameCardCarouselScreen()
-            : renderWarriorProfileSetupScreen();
+      ? renderGuideSelection()
+      : currentOnboardingScreen === "persona"
+        ? renderPersonaScreen()
+        : currentOnboardingScreen === "name"
+          ? renderInputScreen()
+          : currentOnboardingScreen === "game-card-intro"
+            ? renderGameCardIntroScreen()
+            : currentOnboardingScreen === "game-card-carousel"
+              ? renderGameCardCarouselScreen()
+              : renderWarriorProfileSetupScreen();
 };
 
 const styles = StyleSheet.create({

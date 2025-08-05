@@ -51,16 +51,16 @@ const ChooseName = () => {
         {/* Main Content */}
         <View className="flex-1 flex-row items-start justify-between px-16  border-red-400">
           {/* Left Side - Character Image */}
-          <View className="w-2/5 items-start flex ">
+          <View className="w-2/5 items-start flex h-full">
             <Image
               source={{ uri: player.character.image }}
-              className="w-80 h-96 rounded-2xl"
+              className="w-80 h-96 rounded-2xl  mt-28"
               resizeMode="contain"
             />
           </View>
 
           {/* Right Side - Dialog Box */}
-          <View className="w-[65%] flex pl-8 py-auto  h-[70%] px-4  items-center justify-center">
+          <View className="w-[60%] flex pl-8 py-auto  h-full px-4 items-end justify-end">
             {/* Ornate Dialog Box */}
             <View className="relative  h-full">
               {/* Main dialog container with ornate border effect */}
@@ -74,9 +74,9 @@ const ChooseName = () => {
                 {/* Corner decorations */}
 
                 {/* Dialog content */}
-                <View className="min-h-full gap-y-8 flex items-center justify-center px-4 py-4">
+                <View className="min-h-full gap-y-8 flex items-center justify-center p-8">
                   {/* Character's greeting */}
-                  <Text className="text-white text-sm leading-  text-center">
+                  <Text className="text-white text-xs   text-center">
                     {player.character.greeting}
                   </Text>
 

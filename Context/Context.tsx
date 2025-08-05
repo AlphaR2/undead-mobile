@@ -13,7 +13,7 @@ interface ContextTypes {
   onboarding: {
     currentOnboardingScreen: string;
     setCurrentOnboardingScreen: React.Dispatch<
-      React.SetStateAction<"welcome" | "selection" | "name" | "game-card-intro" | "game-card-carousel" | "warrior-setup">
+      React.SetStateAction<"welcome" | "selection" | "name" | "game-card-intro" | "game-card-carousel" | "warrior-setup" | "persona">
     >;
   };
 }
@@ -27,7 +27,7 @@ const ContextProvider = ({
 }>) => {
   const [accessToken, setAccessToken] = useState<string | null>("");
   const [currentOnboardingScreen, setCurrentOnboardingScreen] = useState<
-    "welcome" | "selection" | "name" | "game-card-intro" | "game-card-carousel" | "warrior-setup"
+    "welcome" | "selection" | "name" | "game-card-intro" | "game-card-carousel" | "warrior-setup" | "persona"
   >("welcome");
   const [isLoading, setIsLoading] = useState(false);
 

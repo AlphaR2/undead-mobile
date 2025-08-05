@@ -28,7 +28,7 @@ const characters: Character[] = [
     name: "ORACLE MYSTRAL",
     title: "(Knowledge Specialist)",
     description:
-      "I am Mystral, keeper of sacred knowledge. Through me, you'll learn the deepest secrets of this realm.",
+      "I am Mystral, keeper of sacred knowledge.",
     recommendedFor: "Intermediate users",
     image:
       "https://res.cloudinary.com/deensvquc/image/upload/v1753436766/Mask_group_1_csv8ta.png",
@@ -38,7 +38,7 @@ const characters: Character[] = [
     name: "GUARDIAN NEXUS",
     title: "(Combat Expert)",
     description:
-      "I am Nexus, master of battle tactics. I will forge you into a formidable warrior of this digital realm.",
+      "I am Nexus, master of battle tactics.",
     recommendedFor: "Advanced users",
     image:
       "https://res.cloudinary.com/deensvquc/image/upload/v1753436774/Mask_group_ilokc7.png",
@@ -60,7 +60,7 @@ const CharacterCarousel: React.FC = () => {
 
   const handleConfirm = () => {
     const selectedCharacter = characters[currentIndex];
-    setCurrentOnboardingScreen("name");
+    setCurrentOnboardingScreen("persona");
     console.log("Selected character:", selectedCharacter.name);
   };
 
@@ -158,7 +158,7 @@ const CharacterCarousel: React.FC = () => {
                 >
                   <ImageBackground
                     source={{
-                      uri: "https://res.cloudinary.com/deensvquc/image/upload/v1753433285/Frame_4_ppu88h.png",
+                      uri: "https://res.cloudinary.com/deensvquc/image/upload/v1753446242/button-bg_lwqals.png",
                     }}
                     className="h-[200px] w-[200px]"
                     resizeMode="contain"
@@ -189,7 +189,7 @@ const CharacterCarousel: React.FC = () => {
               uri: "https://res.cloudinary.com/deensvquc/image/upload/v1753427362/Group_1_khuulp.png",
             }}
             // style={styles.background}
-            className=""
+            className="flex items-center justify-center h-full w-full"
             resizeMode="contain"
           >
             <View style={styles.infoCard} className="gap-y-4">
@@ -197,12 +197,12 @@ const CharacterCarousel: React.FC = () => {
                 <Text style={styles.characterName}>
                   {currentCharacter.name}
                 </Text>
-                <Text className="text-white font-light">
+                <Text className="text-white text-center font-light">
                   {currentCharacter.title}
                 </Text>
               </View>
 
-              <Text className="text-white pt-4 font-light text-sm">
+              <Text className="text-white pt-4 font-light text-sm text-center">
                 "{currentCharacter.description}"
               </Text>
             </View>
@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
   },
   inactiveCharacter: {
     // Previous character styling
-    opacity: 0.5,
+    opacity: 0.7,
   },
   characterImage: {
     // borderRadius: 15,
@@ -370,7 +370,7 @@ const styles = StyleSheet.create({
     // paddingHorizontal: 40,
     alignSelf: "center",
     // marginTop: 30,
-    display: "absolute",
+    // display: "absolute",
     borderWidth: 2,
     borderColor: "#D4AF37",
     minWidth: 120,
