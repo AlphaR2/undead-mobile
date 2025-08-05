@@ -1,4 +1,3 @@
-import { GameFonts } from "@/constants/GameFonts";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -37,8 +36,9 @@ export const ToastModal: React.FC<ToastModalProps> = ({
   config,
   onDismiss,
 }) => {
-  const translateY = useRef(new Animated.Value(-100)).current;
+  const translateY = useRef(new Animated.Value(-120)).current;
   const opacity = useRef(new Animated.Value(0)).current;
+  const scale = useRef(new Animated.Value(0.9)).current;
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -57,15 +57,22 @@ export const ToastModal: React.FC<ToastModalProps> = ({
 
   const showToast = () => {
     Animated.parallel([
-      Animated.timing(translateY, {
+      Animated.spring(translateY, {
         toValue: 0,
-        duration: 300,
         useNativeDriver: true,
+        tension: 100,
+        friction: 8,
       }),
       Animated.timing(opacity, {
         toValue: 1,
         duration: 300,
         useNativeDriver: true,
+      }),
+      Animated.spring(scale, {
+        toValue: 1,
+        useNativeDriver: true,
+        tension: 100,
+        friction: 8,
       }),
     ]).start();
   };
@@ -73,12 +80,17 @@ export const ToastModal: React.FC<ToastModalProps> = ({
   const hideToast = () => {
     Animated.parallel([
       Animated.timing(translateY, {
-        toValue: -100,
+        toValue: -120,
         duration: 250,
         useNativeDriver: true,
       }),
       Animated.timing(opacity, {
         toValue: 0,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scale, {
+        toValue: 0.9,
         duration: 250,
         useNativeDriver: true,
       }),
@@ -108,48 +120,56 @@ export const ToastModal: React.FC<ToastModalProps> = ({
         Animated.spring(translateY, {
           toValue: 0,
           useNativeDriver: true,
+          tension: 100,
+          friction: 8,
         }).start();
       }
     },
   });
 
-  const getToastColors = (type: ToastConfig["type"]) => {
+  const getToastStyles = (type: ToastConfig["type"]) => {
+    const baseColor = "#cd7f32"; // Your bronze color
+    
     switch (type) {
       case "success":
         return {
-          background: "#1a4d3a",
-          border: "#22c55e",
-          icon: "✅",
-          text: "#22c55e",
+          backgroundColor: "#1a1612", // Very dark bronze
+          borderColor: baseColor,
+          accentColor: "#a86829", // Slightly darker bronze
+          icon: "⚡",
+          iconBg: "rgba(205, 127, 50, 0.15)",
         };
       case "error":
         return {
-          background: "#4d1a1a",
-          border: "#ef4444",
-          icon: "❌",
-          text: "#ef4444",
+          backgroundColor: "#1c1410", // Dark bronze with red undertone
+          borderColor: "#b5702c", // Darker bronze
+          accentColor: "#9d5f26", // Much darker bronze
+          icon: "⚠",
+          iconBg: "rgba(181, 112, 44, 0.15)",
         };
       case "warning":
         return {
-          background: "#4d3a1a",
-          border: "#f59e0b",
-          icon: "⚠️",
-          text: "#f59e0b",
+          backgroundColor: "#1b1511", // Dark bronze
+          borderColor: "#d6883a", // Lighter bronze
+          accentColor: "#b87230", // Medium bronze
+          icon: "⚡",
+          iconBg: "rgba(214, 136, 58, 0.15)",
         };
       case "info":
       default:
         return {
-          background: "#1a3a4d",
-          border: "#3b82f6",
-          icon: "ℹ️",
-          text: "#3b82f6",
+          backgroundColor: "#191613", // Dark bronze base
+          borderColor: baseColor,
+          accentColor: "#b5702c", // Darker bronze
+          icon: "ℹ",
+          iconBg: "rgba(205, 127, 50, 0.15)",
         };
     }
   };
 
   if (!isVisible || !config) return null;
 
-  const colors = getToastColors(config.type);
+  const styles = getToastStyles(config.type);
 
   return (
     <Modal
@@ -158,50 +178,85 @@ export const ToastModal: React.FC<ToastModalProps> = ({
       animationType="none"
       statusBarTranslucent
     >
-      <View style={styles.overlay}>
+      <View style={toastStyles.overlay}>
         <Animated.View
           style={[
-            styles.toastContainer,
+            toastStyles.toastContainer,
             {
-              backgroundColor: colors.background,
-              borderColor: colors.border,
-              transform: [{ translateY }],
+              backgroundColor: styles.backgroundColor,
+              borderColor: styles.borderColor,
+              transform: [{ translateY }, { scale }],
               opacity,
             },
           ]}
           {...panResponder.panHandlers}
         >
+          {/* Glowing border effect */}
+          <View 
+            style={[
+              toastStyles.glowBorder, 
+              { shadowColor: styles.borderColor }
+            ]} 
+          />
+
           {/* Toast Content */}
-          <View style={styles.toastContent}>
-            <View style={styles.toastHeader}>
-              <Text style={styles.toastIcon}>{colors.icon}</Text>
-              <Text
+          <View style={toastStyles.toastContent}>
+            {/* Header with icon and title */}
+            <View style={toastStyles.toastHeader}>
+              <View 
                 style={[
-                  styles.toastTitle,
-                  GameFonts.button,
-                  { color: colors.text },
+                  toastStyles.iconContainer, 
+                  { backgroundColor: styles.iconBg }
                 ]}
               >
-                {config.title}
-              </Text>
+                <Text style={toastStyles.toastIcon}>{styles.icon}</Text>
+              </View>
+              
+              <View style={toastStyles.textContainer}>
+                <Text
+                  style={[
+                    toastStyles.toastTitle,
+                    { color: "#cd7f32" }, // Main bronze color for title
+                  ]}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  {config.title}
+                </Text>
+                
+                {config.message && (
+                  <Text 
+                    style={[
+                      toastStyles.toastMessage,
+                      { color: "#a0844a" }, // Lighter bronze for message
+                    ]}
+                    numberOfLines={2}
+                    ellipsizeMode="tail"
+                  >
+                    {config.message}
+                  </Text>
+                )}
+              </View>
+
               <TouchableOpacity
-                style={styles.closeButton}
+                style={toastStyles.closeButton}
                 onPress={hideToast}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <Text style={styles.closeText}>✕</Text>
+                <Text style={toastStyles.closeText}>✕</Text>
               </TouchableOpacity>
             </View>
 
-            {config.message && (
-              <Text style={[styles.toastMessage, GameFonts.epic]}>
-                {config.message}
-              </Text>
-            )}
-
+            {/* Action button */}
             {config.action && (
               <TouchableOpacity
-                style={[styles.actionButton, { borderColor: colors.border }]}
+                style={[
+                  toastStyles.actionButton, 
+                  { 
+                    borderColor: styles.borderColor,
+                    backgroundColor: styles.iconBg,
+                  }
+                ]}
                 onPress={() => {
                   config.action?.onPress();
                   hideToast();
@@ -209,9 +264,8 @@ export const ToastModal: React.FC<ToastModalProps> = ({
               >
                 <Text
                   style={[
-                    styles.actionText,
-                    GameFonts.button,
-                    { color: colors.text },
+                    toastStyles.actionText,
+                    { color: "#cd7f32" },
                   ]}
                 >
                   {config.action.label}
@@ -221,9 +275,12 @@ export const ToastModal: React.FC<ToastModalProps> = ({
           </View>
 
           {/* Swipe indicator */}
-          <View style={styles.swipeIndicator}>
-            <View
-              style={[styles.swipeBar, { backgroundColor: colors.border }]}
+          <View style={toastStyles.swipeIndicator}>
+            <View 
+              style={[
+                toastStyles.swipeBar, 
+                { backgroundColor: styles.accentColor }
+              ]} 
             />
           </View>
         </Animated.View>
@@ -232,7 +289,7 @@ export const ToastModal: React.FC<ToastModalProps> = ({
   );
 };
 
-// Toast Manager Hook
+// Toast Manager Hook (unchanged)
 export const useToast = () => {
   const [toastConfig, setToastConfig] = useState<ToastConfig | null>(null);
   const [visible, setVisible] = useState(false);
@@ -305,80 +362,111 @@ export const useToast = () => {
   };
 };
 
-const styles = StyleSheet.create({
+const toastStyles = StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: "flex-start",
     alignItems: "center",
-    paddingTop: 60,
+    paddingTop: 50,
     backgroundColor: "transparent",
+    paddingHorizontal: 16,
   },
   toastContainer: {
-    width: SCREEN_WIDTH - 40,
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
+    width: SCREEN_WIDTH - 32,
+    maxWidth: 400,
+    borderRadius: 20,
+    borderWidth: 2,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  glowBorder: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 18,
+    shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
-    elevation: 8,
+    elevation: 12,
   },
   toastContent: {
-    flex: 1,
+    padding: 16,
+    zIndex: 1,
   },
   toastHeader: {
     flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 4,
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
     alignItems: "center",
-    marginBottom: 8,
+    marginRight: 12,
   },
   toastIcon: {
-    fontSize: 20,
-    marginRight: 8,
+    fontSize: 18,
+    textAlign: "center",
+  },
+  textContainer: {
+    flex: 1,
+    paddingTop: 2,
   },
   toastTitle: {
-    flex: 1,
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "700",
     textTransform: "uppercase",
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
+    lineHeight: 20,
+    fontFamily: 'Orbitron-Bold', // Using your game font
+  },
+  toastMessage: {
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 4,
+    fontFamily: 'Cinzel-Regular', // Using your game font
   },
   closeButton: {
-    padding: 4,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: 8,
   },
   closeText: {
     color: "#666",
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
-  },
-  toastMessage: {
-    fontSize: 14,
-    color: "#ccc",
-    marginTop: 4,
-    lineHeight: 20,
+    lineHeight: 18,
   },
   actionButton: {
     marginTop: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 12,
     borderWidth: 1,
     alignSelf: "flex-start",
   },
   actionText: {
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "700",
     textTransform: "uppercase",
-    letterSpacing: 0.5,
+    letterSpacing: 1,
+    fontFamily: 'Orbitron-Medium',
   },
   swipeIndicator: {
     alignItems: "center",
-    marginTop: 8,
+    paddingBottom: 8,
   },
   swipeBar: {
-    width: 40,
-    height: 3,
+    width: 50,
+    height: 4,
     borderRadius: 2,
-    opacity: 0.5,
+    opacity: 0.6,
   },
 });

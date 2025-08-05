@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { CreateContext } from "@/Context/Context";
+import { CreateContext } from "@/context/Context";
 import {
   View,
   Text,

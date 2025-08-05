@@ -7,7 +7,7 @@ import {
   ImageBackground,
 } from "react-native";
 import React, { useContext } from "react";
-import { CreateContext } from "@/Context/Context";
+import { CreateContext } from "@/context/Context";
 
 const GameCardIntro = () => {
   const { height: SCREEN_HEIGHT } = Dimensions.get("window");

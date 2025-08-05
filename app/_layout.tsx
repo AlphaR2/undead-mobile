@@ -12,7 +12,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import "../global.css";
 // Theme provider
 import ContextProvider from "@/context/Context";
-import { View } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { ThemeProvider } from "./providers/ThemeProvider";
 
 // Prevent the splash screen from auto-hiding
@@ -45,9 +45,13 @@ export default function RootLayout() {
   }
 
   return (
-    <View style={{ flex: 1 }}>
-      <dynamicClient.reactNative.WebView />
-      <GestureHandlerRootView style={{ flex: 1 }}>
+    <View style={styles.container}>
+      <View style={styles.webViewContainer}>
+        <dynamicClient.reactNative.WebView />
+      </View>
+      
+      {/* Main App Content */}
+      <GestureHandlerRootView style={styles.appContainer}>
         <ContextProvider>
           <SafeAreaProvider>
             <ThemeProvider>
@@ -84,15 +88,34 @@ export default function RootLayout() {
                   backgroundColor="#000000"
                   translucent={false}
                 />
-
+                
                 {/* Global toast notifications */}
                 <Toast />
               </ErrorBoundary>
             </ThemeProvider>
-            {/* </PrivyProvider> */}
           </SafeAreaProvider>
         </ContextProvider>
       </GestureHandlerRootView>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    position: 'relative',
+  },
+  webViewContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: -1, // Behind everything
+    opacity: 0, // Make it invisible but functional
+  },
+  appContainer: {
+    flex: 1,
+    zIndex: 1, // Above the WebView
+  },
+});
