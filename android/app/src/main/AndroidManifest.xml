@@ -24,8 +24,8 @@
         <action android:name="android.intent.action.VIEW"/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
-        <data android:scheme="rustundeadmobile"/>
-        <data android:scheme="exp+rust-undead-mobile"/>
+        <data android:scheme="rustundead"/>
+        <data android:scheme="exp+rust-undead"/>
       </intent-filter>
     </activity>
   </application>

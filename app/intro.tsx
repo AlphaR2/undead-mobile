@@ -1,7 +1,10 @@
+import { useToast } from "@/components/modal/Toast";
 import { GameFonts } from "@/constants/GameFonts";
+import { useDynamic } from "@/Context/wallet";
 import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Animated,
   Dimensions,
   Image,
@@ -24,10 +27,107 @@ const Intro: React.FC = () => {
   const [slideAnim] = useState(new Animated.Value(50));
   const [textPulse] = useState(new Animated.Value(1));
   const [buttonScale] = useState(new Animated.Value(1));
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+
+  const dynamicClient = useDynamic();
+  const { showSuccess, showError, showInfo, showWarning, ToastComponent } =
+    useToast();
+
+  // Memoize event handlers to prevent infinite re-renders
+  const handleAuthInit = useCallback(() => {
+    console.log("Authentication started");
+    showInfo(
+      "Connecting to Realm",
+      "Establishing your connection to the undead realm...",
+      3000
+    );
+  }, [showInfo]);
+
+  const handleAuthSuccess = useCallback(
+    (user: any) => {
+      console.log("Authentication successful:", user);
+      setIsAuthenticating(false);
+
+      showSuccess(
+        "Welcome to Rust Undead!",
+        "Your journey into the undead realm begins now!",
+        3000
+      );
+
+      // Navigate after showing success message
+      setTimeout(() => {
+        router.replace("/guide");
+      }, 3000);
+    },
+    [showSuccess]
+  );
+
+  const handleAuthFailed = useCallback(
+    (error: any) => {
+      console.log("Authentication failed:", error);
+      setIsAuthenticating(false);
+
+      showError(
+        "Authentication Failed",
+        "The realm gates remain closed. Try again or enter as a guest.",
+        5000
+      );
+    },
+    [showError]
+  );
+
+  const handleAuthFlowCancelled = useCallback(() => {
+    console.log("Authentication flow cancelled");
+    setIsAuthenticating(false);
+
+    showWarning(
+      "Authentication Cancelled",
+      "You cancelled the connection. You can try again or continue as guest.",
+      4000
+    );
+  }, [showWarning]);
+
+  const handleAuthFlowClosed = useCallback(() => {
+    console.log("Authentication flow closed");
+    setIsAuthenticating(false);
+  }, []);
+
+  const handleAuthFlowOpened = useCallback(() => {
+    console.log("Authentication flow opened");
+    showInfo(
+      "Realm Portal Opening",
+      "Choose your preferred method to enter the undead realm.",
+      3000
+    );
+  }, [showInfo]);
 
   useEffect(() => {
     StatusBar.setHidden(true);
 
+    // Check if user is already authenticated
+    if (dynamicClient.auth.authenticatedUser?.email) {
+      // Show welcome back message and navigate
+      showSuccess(
+        "Welcome Back, Warrior!",
+        "Returning to your undead realm...",
+        2000
+      );
+
+      setTimeout(() => {
+        router.replace("/guide");
+      }, 2000);
+      return;
+    }
+
+    // Add event listeners
+    dynamicClient.auth.on("authInit", handleAuthInit);
+    dynamicClient.auth.on("authSuccess", handleAuthSuccess);
+    dynamicClient.auth.on("authFailed", handleAuthFailed);
+    dynamicClient.ui.on("authFlowCancelled", handleAuthFlowCancelled);
+    dynamicClient.ui.on("authFlowClosed", handleAuthFlowClosed);
+    dynamicClient.ui.on("authFlowOpened", handleAuthFlowOpened);
+
+    // Start animations
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -45,14 +145,63 @@ const Intro: React.FC = () => {
 
     return () => {
       StatusBar.setHidden(false);
+
+      // Clean up event listeners
+      dynamicClient.auth.off("authInit", handleAuthInit);
+      dynamicClient.auth.off("authSuccess", handleAuthSuccess);
+      dynamicClient.auth.off("authFailed", handleAuthFailed);
+      dynamicClient.ui.off("authFlowCancelled", handleAuthFlowCancelled);
+      dynamicClient.ui.off("authFlowClosed", handleAuthFlowClosed);
+      dynamicClient.ui.off("authFlowOpened", handleAuthFlowOpened);
     };
-  }, []);
+  }, [
+    dynamicClient,
+    handleAuthInit,
+    handleAuthSuccess,
+    handleAuthFailed,
+    handleAuthFlowCancelled,
+    handleAuthFlowClosed,
+    handleAuthFlowOpened,
+    showSuccess,
+  ]);
 
   const onContinue = () => {
-    router.push("/guide");
+    triggerAuthentication();
   };
 
+  const onSkipAuth = useCallback(() => {
+    showInfo(
+      "Entering as Guest",
+      "Welcome, anonymous traveler. Your progress won't be saved.",
+      3000
+    );
+
+    setTimeout(() => {
+      router.push("/guide");
+    }, 3000);
+  }, [showInfo]);
+
+  const triggerAuthentication = useCallback(async () => {
+    try {
+      setIsAuthenticating(true);
+
+      // Use Dynamic's UI for authentication
+      dynamicClient.ui.auth.show();
+    } catch (error) {
+      console.error("Failed to show Dynamic auth UI:", error);
+      setIsAuthenticating(false);
+
+      showError(
+        "Portal Error",
+        "Failed to open the realm portal. The ancient magic seems to be disrupted.",
+        5000
+      );
+    }
+  }, [dynamicClient, showError]);
+
   const onButtonPressIn = () => {
+    if (isAuthenticating) return;
+
     Animated.timing(buttonScale, {
       toValue: 0.95,
       duration: 100,
@@ -61,6 +210,8 @@ const Intro: React.FC = () => {
   };
 
   const onButtonPressOut = () => {
+    if (isAuthenticating) return;
+
     Animated.timing(buttonScale, {
       toValue: 1,
       duration: 100,
@@ -137,19 +288,52 @@ const Intro: React.FC = () => {
             ]}
           >
             <TouchableOpacity
-              style={styles.continueButton}
+              style={[
+                styles.continueButton,
+                isAuthenticating && styles.disabledButton,
+              ]}
               onPress={onContinue}
               onPressIn={onButtonPressIn}
               onPressOut={onButtonPressOut}
               activeOpacity={0.85}
+              disabled={isAuthenticating}
             >
-              <Text style={[styles.buttonText, GameFonts.button]}>
-                BEGIN YOUR JOURNEY
+              {isAuthenticating ? (
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator size="small" color="#cd7f32" />
+                  <Text
+                    style={[
+                      styles.buttonText,
+                      GameFonts.button,
+                      styles.loadingText,
+                    ]}
+                  >
+                    OPENING PORTAL...
+                  </Text>
+                </View>
+              ) : (
+                <Text style={[styles.buttonText, GameFonts.button]}>
+                  BEGIN YOUR JOURNEY
+                </Text>
+              )}
+            </TouchableOpacity>
+
+            {/* Guest Mode Button */}
+            <TouchableOpacity
+              style={styles.guestButton}
+              onPress={onSkipAuth}
+              disabled={isAuthenticating}
+            >
+              <Text style={[styles.guestButtonText, GameFonts.epic]}>
+                Continue as Guest
               </Text>
             </TouchableOpacity>
           </Animated.View>
         </SafeAreaView>
       </ImageBackground>
+
+      {/* Custom Toast Modal */}
+      <ToastComponent />
     </View>
   );
 };
@@ -233,6 +417,10 @@ const styles = StyleSheet.create({
     elevation: 10,
     minWidth: 220,
     alignItems: "center",
+    marginBottom: 16,
+  },
+  disabledButton: {
+    opacity: 0.7,
   },
   buttonText: {
     fontSize: 14,
@@ -241,6 +429,24 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     textAlign: "center",
     textTransform: "uppercase",
+  },
+  loadingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  loadingText: {
+    marginLeft: 8,
+  },
+  guestButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+  },
+  guestButtonText: {
+    fontSize: 12,
+    color: "#888",
+    textAlign: "center",
+    textDecorationLine: "underline",
   },
 });
 

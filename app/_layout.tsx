@@ -1,6 +1,6 @@
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { Toast } from "@/components/ui/Toast";
-// import { PrivyProvider } from "@privy-io/expo";
+import { dynamicClient } from "@/Context/wallet";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -11,8 +11,9 @@ import "react-native-reanimated";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "../global.css";
 // Theme provider
-import { ThemeProvider } from "./providers/ThemeProvider";
 import ContextProvider from "@/Context/Context";
+import { View } from "react-native";
+import { ThemeProvider } from "./providers/ThemeProvider";
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -44,54 +45,54 @@ export default function RootLayout() {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <ContextProvider>
-        <SafeAreaProvider>
-          {/* <PrivyProvider
-          appId={Constants.expoConfig?.extra?.privyAppId}
-          clientId={Constants.expoConfig?.extra?.privyClientId}
-        > */}
-          <ThemeProvider>
-            <ErrorBoundary>
-              <Stack screenOptions={{ headerShown: false }}>
-                {/* Splash screen (entry point) */}
-                <Stack.Screen
-                  name="index"
-                  options={{
-                    gestureEnabled: false,
-                    animation: "none",
-                  }}
+    <View style={{ flex: 1 }}>
+      <dynamicClient.reactNative.WebView />
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <ContextProvider>
+          <SafeAreaProvider>
+            <ThemeProvider>
+              <ErrorBoundary>
+                <Stack screenOptions={{ headerShown: false }}>
+                  {/* Splash screen (entry point) */}
+                  <Stack.Screen
+                    name="index"
+                    options={{
+                      gestureEnabled: false,
+                      animation: "none",
+                    }}
+                  />
+                  {/* Onboarding flow */}
+                  <Stack.Screen
+                    name="trailer"
+                    options={{
+                      gestureEnabled: false,
+                      animation: "fade",
+                      presentation: "fullScreenModal",
+                    }}
+                  />
+                  {/* wallet connect will be in intro */}
+                  <Stack.Screen name="intro" />
+                  <Stack.Screen name="guide" />
+                  <Stack.Screen name="warrior-creation" />
+                  {/* Main app tabs */}
+                  <Stack.Screen name="(tabs)" />
+                  {/* 404 page */}
+                  <Stack.Screen name="+not-found" />
+                </Stack>
+                <StatusBar
+                  style="light"
+                  backgroundColor="#000000"
+                  translucent={false}
                 />
-                {/* Onboarding flow */}
-                <Stack.Screen
-                  name="trailer"
-                  options={{
-                    gestureEnabled: false,
-                    animation: "fade",
-                    presentation: "fullScreenModal",
-                  }}
-                />
-                <Stack.Screen name="intro" />
-                <Stack.Screen name="guide" />
-                <Stack.Screen name="warrior-creation" />
-                {/* Main app tabs */}
-                <Stack.Screen name="(tabs)" />
-                {/* 404 page */}
-                <Stack.Screen name="+not-found" />
-              </Stack>
-              <StatusBar
-                style="light"
-                backgroundColor="#000000"
-                translucent={false}
-              />
 
-              {/* Global toast notifications */}
-              <Toast />
-            </ErrorBoundary>
-          </ThemeProvider>
-          {/* </PrivyProvider> */}
-        </SafeAreaProvider>
-      </ContextProvider>
-    </GestureHandlerRootView>
+                {/* Global toast notifications */}
+                <Toast />
+              </ErrorBoundary>
+            </ThemeProvider>
+            {/* </PrivyProvider> */}
+          </SafeAreaProvider>
+        </ContextProvider>
+      </GestureHandlerRootView>
+    </View>
   );
 }
