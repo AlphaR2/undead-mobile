@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Rust Undead",
-    "slug": "Rust Undead",
+    "slug": "rust-undead",
     "version": "1.0.0",
     "orientation": "landscape",
     "icon": "./assets/images/ru.png",
@@ -10,7 +10,8 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "requireFullScreen": true
+      "requireFullScreen": true,
+      "bundleIdentifier": "com.alphar33.rustundead"
     },
     "android": {
       "adaptiveIcon": {
@@ -28,7 +29,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash.png",
+          "image": "./assets/images/spl.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
@@ -52,6 +53,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "8d63da82-d8ec-476f-803c-a2335b5b3e75"
+      }
     }
   }
 }

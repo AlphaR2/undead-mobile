@@ -1,23 +1,28 @@
-import React, { useEffect, useState } from 'react';
+import { GameFonts } from "@/constants/GameFonts";
 import {
+  WalletApp,
+  getInstalledWallets,
+  openWalletDownload,
+  useMWA,
+} from "@/context/mwa";
+import { useDynamic } from "@/context/wallet";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Animated,
   Modal,
-  View,
+  Platform,
+  ScrollView,
+  StyleSheet,
   Text,
   TouchableOpacity,
-  StyleSheet,
-  Animated,
-  ActivityIndicator,
-  ScrollView,
-} from 'react-native';
-import { useMWA, getInstalledWallets, WalletApp, openWalletDownload } from '@/context/mwa';
-import { useDynamic } from '@/context/wallet';
-import { GameFonts } from '@/constants/GameFonts';
-import { Platform } from 'react-native';
+  View,
+} from "react-native";
 
 interface WalletSelectionModalProps {
   visible: boolean;
   onClose: () => void;
-  onWalletConnected: (walletType: 'dynamic' | 'mwa') => void;
+  onWalletConnected: (walletType: "dynamic" | "mwa") => void;
 }
 
 export const WalletSelectionModal: React.FC<WalletSelectionModalProps> = ({
@@ -29,10 +34,14 @@ export const WalletSelectionModal: React.FC<WalletSelectionModalProps> = ({
   const [slideAnim] = useState(new Animated.Value(50));
   const [installedWallets, setInstalledWallets] = useState<WalletApp[]>([]);
   const [isCheckingWallets, setIsCheckingWallets] = useState(true);
-  
+
   // MWA context
-  const { connect: connectMWA, isConnecting: isConnectingMWA, hasWalletsInstalled } = useMWA();
-  
+  const {
+    connect: connectMWA,
+    isConnecting: isConnectingMWA,
+    hasWalletsInstalled,
+  } = useMWA();
+
   // Dynamic context
   const dynamicClient = useDynamic();
   const [isConnectingDynamic, setIsConnectingDynamic] = useState(false);
@@ -68,7 +77,7 @@ export const WalletSelectionModal: React.FC<WalletSelectionModalProps> = ({
       const wallets = await getInstalledWallets();
       setInstalledWallets(wallets);
     } catch (error) {
-      console.error('Failed to check installed wallets:', error);
+      console.error("Failed to check installed wallets:", error);
       setInstalledWallets([]);
     } finally {
       setIsCheckingWallets(false);
@@ -78,9 +87,9 @@ export const WalletSelectionModal: React.FC<WalletSelectionModalProps> = ({
   const handleMWAConnect = async () => {
     try {
       await connectMWA();
-      onWalletConnected('mwa');
+      onWalletConnected("mwa");
     } catch (error) {
-      console.error('MWA connection failed:', error);
+      console.error("MWA connection failed:", error);
       // Error is handled by MWA context
     }
   };
@@ -89,15 +98,15 @@ export const WalletSelectionModal: React.FC<WalletSelectionModalProps> = ({
     try {
       setIsConnectingDynamic(true);
       dynamicClient.ui.auth.show();
-      onWalletConnected('dynamic');
+      onWalletConnected("dynamic");
     } catch (error) {
-      console.error('Dynamic connection failed:', error);
+      console.error("Dynamic connection failed:", error);
       setIsConnectingDynamic(false);
     }
   };
 
   const handleDownloadWallet = (wallet: WalletApp) => {
-    const platform = Platform.OS as 'android' | 'ios';
+    const platform = Platform.OS as "android" | "ios";
     openWalletDownload(wallet, platform);
   };
 
@@ -138,14 +147,18 @@ export const WalletSelectionModal: React.FC<WalletSelectionModalProps> = ({
         >
           {/* Header */}
           <View style={styles.header}>
-            <Text style={[styles.title, GameFonts.title]}>Choose Your Path</Text>
+            <Text style={[styles.title, GameFonts.title]}>
+              Choose Your Path
+            </Text>
             <Text style={[styles.subtitle, GameFonts.body]}>
               Enter the undead realm with your preferred wallet
             </Text>
           </View>
 
-          <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-            
+          <ScrollView
+            style={styles.content}
+            showsVerticalScrollIndicator={false}
+          >
             {/* MWA Wallets Section */}
             <View style={styles.section}>
               <Text style={[styles.sectionTitle, GameFonts.caption]}>
@@ -174,28 +187,39 @@ export const WalletSelectionModal: React.FC<WalletSelectionModalProps> = ({
                   <Text style={[styles.suggestionText, GameFonts.caption]}>
                     Install a wallet app to connect:
                   </Text>
-                  
+
                   {/* Popular wallet download options */}
                   <View style={styles.downloadWallets}>
                     {[
-                      { name: 'Phantom', icon: '👻' },
-                      { name: 'Solflare', icon: '🔥' },
-                      { name: 'Glow', icon: '✨' },
+                      { name: "Phantom", icon: "👻" },
+                      { name: "Solflare", icon: "🔥" },
+                      { name: "Glow", icon: "✨" },
                     ].map((wallet) => (
                       <TouchableOpacity
                         key={wallet.name}
                         style={styles.downloadWalletButton}
-                        onPress={() => handleDownloadWallet(installedWallets.find(w => w.name === wallet.name) || { 
-                          name: wallet.name, 
-                          scheme: `${wallet.name.toLowerCase()}://`,
-                          downloadUrl: {
-                            android: `https://play.google.com/store/apps/details?id=app.${wallet.name.toLowerCase()}`,
-                            ios: `https://apps.apple.com/app/${wallet.name.toLowerCase()}-solana-wallet`
-                          }
-                        } as WalletApp)}
+                        onPress={() =>
+                          handleDownloadWallet(
+                            installedWallets.find(
+                              (w) => w.name === wallet.name
+                            ) ||
+                              ({
+                                name: wallet.name,
+                                scheme: `${wallet.name.toLowerCase()}://`,
+                                downloadUrl: {
+                                  android: `https://play.google.com/store/apps/details?id=app.${wallet.name.toLowerCase()}`,
+                                  ios: `https://apps.apple.com/app/${wallet.name.toLowerCase()}-solana-wallet`,
+                                },
+                              } as WalletApp)
+                          )
+                        }
                       >
-                        <Text style={styles.downloadWalletIcon}>{wallet.icon}</Text>
-                        <Text style={[styles.downloadWalletText, GameFonts.caption]}>
+                        <Text style={styles.downloadWalletIcon}>
+                          {wallet.icon}
+                        </Text>
+                        <Text
+                          style={[styles.downloadWalletText, GameFonts.caption]}
+                        >
                           {wallet.name}
                         </Text>
                       </TouchableOpacity>
@@ -234,14 +258,16 @@ export const WalletSelectionModal: React.FC<WalletSelectionModalProps> = ({
                     </Text>
                   </View>
                 ) : (
-                  <>
+                  <View>
                     <Text style={[styles.dynamicButtonText, GameFonts.button]}>
                       Create Wallet
                     </Text>
-                    <Text style={[styles.dynamicButtonSubtext, GameFonts.caption]}>
+                    <Text
+                      style={[styles.dynamicButtonSubtext, GameFonts.caption]}
+                    >
                       Email, Google, Apple, or Phone
                     </Text>
-                  </>
+                  </View>
                 )}
               </TouchableOpacity>
 
@@ -277,36 +303,36 @@ export const WalletSelectionModal: React.FC<WalletSelectionModalProps> = ({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
   },
   modalContainer: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: "#1a1a1a",
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#cd7f32',
-    width: '100%',
+    borderColor: "#cd7f32",
+    width: "100%",
     maxWidth: 400,
-    maxHeight: '90%',
+    maxHeight: "90%",
   },
   header: {
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#333',
-    alignItems: 'center',
+    borderBottomColor: "#333",
+    alignItems: "center",
   },
   title: {
     fontSize: 24,
-    color: '#cd7f32',
-    textAlign: 'center',
+    color: "#cd7f32",
+    textAlign: "center",
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 14,
-    color: '#888',
-    textAlign: 'center',
+    color: "#888",
+    textAlign: "center",
   },
   content: {
     flex: 1,
@@ -317,81 +343,81 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    color: '#cd7f32',
+    color: "#cd7f32",
     marginBottom: 8,
   },
   sectionDescription: {
     fontSize: 14,
-    color: '#ccc',
+    color: "#ccc",
     marginBottom: 16,
     lineHeight: 20,
   },
   loadingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     padding: 16,
   },
   loadingText: {
-    color: '#888',
+    color: "#888",
     marginLeft: 8,
   },
   installedWallets: {
     gap: 8,
   },
   installedWalletItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#2a2a2a',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#2a2a2a",
     padding: 12,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#444',
+    borderColor: "#444",
   },
   walletInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   walletIcon: {
     width: 32,
     height: 32,
-    backgroundColor: '#cd7f32',
+    backgroundColor: "#cd7f32",
     borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginRight: 12,
   },
   walletIconText: {
-    color: '#121212',
+    color: "#121212",
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   walletName: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
   },
   noWalletsContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     padding: 16,
   },
   noWalletsText: {
-    color: '#888',
-    textAlign: 'center',
+    color: "#888",
+    textAlign: "center",
     marginBottom: 8,
   },
   suggestionText: {
-    color: '#666',
-    textAlign: 'center',
+    color: "#666",
+    textAlign: "center",
     marginBottom: 16,
   },
   downloadWallets: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
     gap: 16,
   },
   downloadWalletButton: {
-    alignItems: 'center',
+    alignItems: "center",
     padding: 8,
   },
   downloadWalletIcon: {
@@ -399,64 +425,64 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   downloadWalletText: {
-    color: '#cd7f32',
+    color: "#cd7f32",
     fontSize: 12,
   },
   divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginVertical: 16,
   },
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#333',
+    backgroundColor: "#333",
   },
   dividerText: {
-    color: '#666',
+    color: "#666",
     marginHorizontal: 12,
   },
   dynamicButton: {
-    backgroundColor: '#cd7f32',
+    backgroundColor: "#cd7f32",
     padding: 16,
     borderRadius: 12,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 12,
   },
   buttonLoadingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   dynamicButtonText: {
-    color: '#121212',
+    color: "#121212",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 2,
   },
   dynamicButtonSubtext: {
-    color: '#333',
+    color: "#333",
     fontSize: 12,
   },
   benefitsList: {
     gap: 4,
   },
   benefitItem: {
-    color: '#888',
+    color: "#888",
     fontSize: 12,
     lineHeight: 18,
   },
   footer: {
     padding: 20,
     borderTopWidth: 1,
-    borderTopColor: '#333',
-    alignItems: 'center',
+    borderTopColor: "#333",
+    alignItems: "center",
   },
   closeButton: {
     paddingVertical: 8,
     paddingHorizontal: 24,
   },
   closeButtonText: {
-    color: '#888',
-    textDecorationLine: 'underline',
+    color: "#888",
+    textDecorationLine: "underline",
   },
 });
