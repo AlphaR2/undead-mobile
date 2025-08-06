@@ -1,8 +1,5 @@
-import { View } from "react-native";
-import React from "react";
 import { Stack } from "expo-router";
-import Topbar from "@/components/Topbar";
-
+import { View } from "react-native";
 
 const RootLayout = () => {
   return (
@@ -14,13 +11,11 @@ const RootLayout = () => {
           headerTintColor: "#F6BE00",
           headerBackTitle: "",
           headerTitle: "",
-          headerShown: false
-
+          headerShown: false,
         }}
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
       </Stack>
-      
     </View>
   );
 };
