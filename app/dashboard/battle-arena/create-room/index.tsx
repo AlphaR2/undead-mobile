@@ -1,5 +1,5 @@
 // import { useGameData } from "@/hooks/useGameData";
-// import { ImageRarity, Warrior, WarriorClass } from "@/types/undead";
+import { ImageRarity, Warrior, WarriorClass } from "@/types/undead";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -1055,9 +1055,9 @@ const RoomCreation: React.FC = () => {
                           {/* Card */}
                           <View className="bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] border-2 border-[#cd7f32]/30 rounded-2xl p-4 mb-4 relative">
                             {/* Class Badge */}
-                            <View className="bg-gradient-to-r from-[#cd7f32] to-[#ff8c42] text-black px-3 py-1 rounded-full font-bold text-sm flex flex-row items-center gap-2">
+                            <Text className="bg-gradient-to-r from-[#cd7f32] to-[#ff8c42] text-black px-3 py-1 rounded-full font-bold text-sm flex flex-row items-center gap-2">
                               {getClassIcon(selectedWarrior?.warriorClass)}
-                            </View>
+                            </Text>
 
                             <View className="flex flex-row gap-4 mt-4">
                               {/* Warrior Image */}
