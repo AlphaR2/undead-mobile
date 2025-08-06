@@ -10,7 +10,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { useContext } from "react";
-import { CreateContext } from "@/Context/Context";
+import { CreateContext } from "@/context/Context";
 // Types
 enum UserPersona {
   TreasureHunter = "TreasureHunter",
@@ -164,7 +164,7 @@ const PersonaSelectionScreen: React.FC = () => {
     info: PersonaInfo;
     isSelected: boolean;
   }> = ({ persona, info, isSelected }) => {
-    const [startColor, endColor] = getGradientColors(info.color);
+    const [startColor] = getGradientColors(info.color);
 
     return (
       <TouchableOpacity
@@ -212,14 +212,21 @@ const PersonaSelectionScreen: React.FC = () => {
     );
   };
 
-  const PreviewCard: React.FC<{ persona: UserPersona; info: PersonaInfo }> = ({
+   const PreviewCard: React.FC<{ persona: UserPersona; info: PersonaInfo }> = ({
     persona,
     info,
   }) => {
     const [startColor, endColor] = getGradientColors(info.color);
 
     return (
-      <View className=" rounded-2xl p-6 border border-[#cd7f32] max-w-md ml-auto">
+      <View 
+        className="rounded-2xl p-6 border border-[#cd7f32] ml-auto"
+        style={{
+          width: 340,
+          height: 335,
+          backgroundColor: "#1a1a1a", // BACKGROUND COLOR
+        }}
+      >
         <View className="items-center mb-4">
           <View
             className="w-16 h-16 rounded-full items-center justify-center mb-3"
@@ -235,10 +242,17 @@ const PersonaSelectionScreen: React.FC = () => {
               colors={[startColor, endColor]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
-              className="w-full h-full rounded-full items-center justify-center"
+              style={{
+                width: "100%",
+                height: "100%",
+                borderRadius: 40,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
             >
-              <Text className="text-3xl">{info.icon}</Text>
+              <Text style={{ fontSize: 36 }}>{info.icon}</Text>
             </LinearGradient>
+            
           </View>
 
           <Text className="text-white text-2xl font-bold text-center mb-2">
@@ -262,20 +276,8 @@ const PersonaSelectionScreen: React.FC = () => {
         <TouchableOpacity
           onPress={handleConfirm}
           className="overflow-hidden rounded-xl"
-          // style={{
-          //   shadowColor: startColor,
-          //   // shadowOffset: { width: 0, height: 2 },
-          //   shadowOpacity: 0.4,
-          //   shadowRadius: 6,
-          //   elevation: 4,
-          // }}
         >
-          {/* <LinearGradient
-            colors={[startColor, endColor]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            className="py-3 px-6"
-          > */}
+
             <Text className="text-white text-base font-bold text-center bg-[#cd7f32] p-2">
               Choose This Persona
             </Text>
@@ -285,17 +287,10 @@ const PersonaSelectionScreen: React.FC = () => {
     );
   };
 
-  return (
-    <View className="flex-1 bg-black">
-      <StatusBar barStyle="light-content" />
 
-      {/* Background gradient */}
-      <LinearGradient
-        colors={["#1a1a1a", "#0f0f0f"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        className="absolute inset-0"
-      />
+  return (
+    <View className="flex-1">
+      <StatusBar barStyle="light-content" />
 
       <View className="flex-1 flex-row p-6   pt-12">
         {/* Left Panel - Persona List */}

@@ -1,6 +1,8 @@
-import { useToast } from "@/components/modal/Toast";
+import { WalletSelectionModal } from "@/components/modal/Walletselectionmodal";
+import { toast } from "@/components/ui/Toast";
 import { GameFonts } from "@/constants/GameFonts";
 import { useDynamic } from "@/context/wallet";
+import { useMWA } from "@/context/mwa";
 import { router } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -27,31 +29,36 @@ const Intro: React.FC = () => {
   const [slideAnim] = useState(new Animated.Value(50));
   const [textPulse] = useState(new Animated.Value(1));
   const [buttonScale] = useState(new Animated.Value(1));
-  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [showWalletModal, setShowWalletModal] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
 
+  // Contexts
   const dynamicClient = useDynamic();
-  const { showSuccess, showError, showInfo, showWarning, ToastComponent } =
-    useToast();
+  const mwa = useMWA();
 
-  // Memoize event handlers to prevent infinite re-renders
+  // Check if any wallet is already connected
+  const isAnyWalletConnected = 
+    dynamicClient.auth.authenticatedUser?.email || 
+    mwa.isConnected;
+
+  // Memoize event handlers for Dynamic wallet
   const handleAuthInit = useCallback(() => {
-    console.log("Authentication started");
-    showInfo(
+    console.log("Dynamic authentication started");
+    toast.info(
       "Connecting to Realm",
-      "Establishing your connection to the undead realm...",
-      3000
+      "Establishing your connection to the undead realm..."
     );
-  }, [showInfo]);
+  }, []);
 
   const handleAuthSuccess = useCallback(
     (user: any) => {
-      console.log("Authentication successful:", user);
-      setIsAuthenticating(false);
+      console.log("Dynamic authentication successful:", user);
+      setIsConnecting(false);
+      setShowWalletModal(false);
 
-      showSuccess(
+      toast.success(
         "Welcome to Rust Undead!",
-        "Your journey into the undead realm begins now!",
-        3000
+        "Your journey into the undead realm begins now!"
       );
 
       // Navigate after showing success message
@@ -59,58 +66,55 @@ const Intro: React.FC = () => {
         router.replace("/guide");
       }, 3000);
     },
-    [showSuccess]
+    []
   );
 
   const handleAuthFailed = useCallback(
     (error: any) => {
-      console.log("Authentication failed:", error);
-      setIsAuthenticating(false);
+      console.log("Dynamic authentication failed:", error);
+      setIsConnecting(false);
 
-      showError(
+      toast.error(
         "Authentication Failed",
-        "The realm gates remain closed. Try again or enter as a guest.",
-        5000
+        "The realm gates remain closed. Try again or enter as a guest."
       );
     },
-    [showError]
+    []
   );
 
   const handleAuthFlowCancelled = useCallback(() => {
-    console.log("Authentication flow cancelled");
-    setIsAuthenticating(false);
+    console.log("Dynamic authentication flow cancelled");
+    setIsConnecting(false);
 
-    showWarning(
+    toast.warning(
       "Authentication Cancelled",
-      "You cancelled the connection. You can try again or continue as guest.",
-      4000
+      "You cancelled the connection. You can try again or continue as guest."
     );
-  }, [showWarning]);
+  }, []);
 
   const handleAuthFlowClosed = useCallback(() => {
-    console.log("Authentication flow closed");
-    setIsAuthenticating(false);
+    console.log("Dynamic authentication flow closed");
+    setIsConnecting(false);
   }, []);
 
   const handleAuthFlowOpened = useCallback(() => {
-    console.log("Authentication flow opened");
-    showInfo(
+    console.log("Dynamic authentication flow opened");
+    toast.info(
       "Realm Portal Opening",
-      "Choose your preferred method to enter the undead realm.",
-      3000
+      "Choose your preferred method to enter the undead realm."
     );
-  }, [showInfo]);
+  }, []);
 
   useEffect(() => {
     StatusBar.setHidden(true);
 
-    // Check if user is already authenticated
-    if (dynamicClient.auth.authenticatedUser?.email) {
-      // Show welcome back message and navigate
-      showSuccess(
+    // Check if user is already authenticated with either wallet type
+    if (isAnyWalletConnected) {
+      const walletType = mwa.isConnected ? 'MWA wallet' : 'Dynamic wallet';
+      
+      toast.success(
         "Welcome Back, Warrior!",
-        "Returning to your undead realm...",
-        2000
+        `Returning to your undead realm with your ${walletType}...`
       );
 
       setTimeout(() => {
@@ -119,7 +123,7 @@ const Intro: React.FC = () => {
       return;
     }
 
-    // Add event listeners
+    // Add Dynamic event listeners
     dynamicClient.auth.on("authInit", handleAuthInit);
     dynamicClient.auth.on("authSuccess", handleAuthSuccess);
     dynamicClient.auth.on("authFailed", handleAuthFailed);
@@ -146,7 +150,7 @@ const Intro: React.FC = () => {
     return () => {
       StatusBar.setHidden(false);
 
-      // Clean up event listeners
+      // Clean up Dynamic event listeners
       dynamicClient.auth.off("authInit", handleAuthInit);
       dynamicClient.auth.off("authSuccess", handleAuthSuccess);
       dynamicClient.auth.off("authFailed", handleAuthFailed);
@@ -156,51 +160,86 @@ const Intro: React.FC = () => {
     };
   }, [
     dynamicClient,
+    isAnyWalletConnected,
+    mwa.isConnected,
     handleAuthInit,
     handleAuthSuccess,
     handleAuthFailed,
     handleAuthFlowCancelled,
     handleAuthFlowClosed,
     handleAuthFlowOpened,
-    showSuccess,
   ]);
 
+  // Handle MWA connection success
+  useEffect(() => {
+    if (mwa.isConnected && mwa.wallet) {
+      setIsConnecting(false);
+      setShowWalletModal(false);
+      
+      toast.success(
+        "MWA Wallet Connected!",
+        `Connected to ${mwa.wallet.label || 'Solana wallet'}`
+      );
+
+      setTimeout(() => {
+        router.replace("/guide");
+      }, 2000);
+    }
+  }, [mwa.isConnected, mwa.wallet]);
+
+  // Handle MWA connection errors
+  useEffect(() => {
+    if (mwa.error) {
+      setIsConnecting(false);
+      toast.error(
+        "Wallet Connection Failed",
+        mwa.error
+      );
+    }
+  }, [mwa.error]);
+
   const onContinue = () => {
-    triggerAuthentication();
+    setShowWalletModal(true);
   };
 
   const onSkipAuth = useCallback(() => {
-    showInfo(
+    toast.info(
       "Entering as Guest",
-      "Welcome, anonymous traveler. Your progress won't be saved.",
-      3000
+      "Welcome, anonymous traveler. Your progress won't be saved."
     );
 
     setTimeout(() => {
       router.push("/guide");
-    }, 3000);
-  }, [showInfo]);
+    }, 2000);
+  }, []);
 
-  const triggerAuthentication = useCallback(async () => {
-    try {
-      setIsAuthenticating(true);
-
-      // Use Dynamic's UI for authentication
-      dynamicClient.ui.auth.show();
-    } catch (error) {
-      console.error("Failed to show Dynamic auth UI:", error);
-      setIsAuthenticating(false);
-
-      showError(
-        "Portal Error",
-        "Failed to open the realm portal. The ancient magic seems to be disrupted.",
-        5000
+  const handleWalletConnected = useCallback((walletType: 'dynamic' | 'mwa') => {
+    setIsConnecting(true);
+    
+    if (walletType === 'dynamic') {
+      // Dynamic connection is handled by the modal itself
+      // The actual connection happens when Dynamic auth flow completes
+      toast.info(
+        "Opening Dynamic Portal",
+        "Choose your login method to create your embedded wallet..."
+      );
+    } else if (walletType === 'mwa') {
+      // MWA connection is handled by the modal's MWA hook
+      // Success/error handling is done in useEffect above
+      toast.info(
+        "Connecting to Wallet",
+        "Please approve the connection in your wallet app..."
       );
     }
-  }, [dynamicClient, showError]);
+  }, []);
+
+  const handleCloseWalletModal = useCallback(() => {
+    setShowWalletModal(false);
+    setIsConnecting(false);
+  }, []);
 
   const onButtonPressIn = () => {
-    if (isAuthenticating) return;
+    if (isConnecting) return;
 
     Animated.timing(buttonScale, {
       toValue: 0.95,
@@ -210,7 +249,7 @@ const Intro: React.FC = () => {
   };
 
   const onButtonPressOut = () => {
-    if (isAuthenticating) return;
+    if (isConnecting) return;
 
     Animated.timing(buttonScale, {
       toValue: 1,
@@ -290,15 +329,15 @@ const Intro: React.FC = () => {
             <TouchableOpacity
               style={[
                 styles.continueButton,
-                isAuthenticating && styles.disabledButton,
+                isConnecting && styles.disabledButton,
               ]}
               onPress={onContinue}
               onPressIn={onButtonPressIn}
               onPressOut={onButtonPressOut}
               activeOpacity={0.85}
-              disabled={isAuthenticating}
+              disabled={isConnecting}
             >
-              {isAuthenticating ? (
+              {isConnecting ? (
                 <View style={styles.loadingContainer}>
                   <ActivityIndicator size="small" color="#cd7f32" />
                   <Text
@@ -308,7 +347,7 @@ const Intro: React.FC = () => {
                       styles.loadingText,
                     ]}
                   >
-                    OPENING PORTAL...
+                    CONNECTING...
                   </Text>
                 </View>
               ) : (
@@ -322,18 +361,32 @@ const Intro: React.FC = () => {
             <TouchableOpacity
               style={styles.guestButton}
               onPress={onSkipAuth}
-              disabled={isAuthenticating}
+              disabled={isConnecting}
             >
               <Text style={[styles.guestButtonText, GameFonts.epic]}>
                 Continue as Guest
               </Text>
             </TouchableOpacity>
+            
+            {/* Connection Status Indicator */}
+            {(mwa.isCheckingWallets || mwa.isConnecting) && (
+              <View style={styles.statusContainer}>
+                <ActivityIndicator size="small" color="#cd7f32" />
+                <Text style={[styles.statusText, GameFonts.caption]}>
+                  {mwa.isCheckingWallets ? 'Checking wallets...' : 'Connecting...'}
+                </Text>
+              </View>
+            )}
           </Animated.View>
         </SafeAreaView>
       </ImageBackground>
 
-      {/* Custom Toast Modal */}
-      <ToastComponent />
+      {/* Wallet Selection Modal */}
+      <WalletSelectionModal
+        visible={showWalletModal}
+        onClose={handleCloseWalletModal}
+        onWalletConnected={handleWalletConnected}
+      />
     </View>
   );
 };
@@ -447,6 +500,16 @@ const styles = StyleSheet.create({
     color: "#888",
     textAlign: "center",
     textDecorationLine: "underline",
+  },
+  statusContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 8,
+  },
+  statusText: {
+    color: "#666",
+    marginLeft: 8,
+    fontSize: 12,
   },
 });
 

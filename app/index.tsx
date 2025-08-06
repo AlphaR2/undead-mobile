@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import { Image, StatusBar, StyleSheet, View } from "react-native";
 import "react-native-crypto-js";
 import "react-native-get-random-values";
+import { DynamicContextProps } from "@dynamic-labs/sdk-react-core";
 
 export default function SplashScreen() {
   const dynamicClient = useDynamic();
@@ -41,7 +42,7 @@ export default function SplashScreen() {
 
       {/* Splash Image */}
       <Image
-        source={require("../assets/images/splash.png")}
+        source={require("../assets/images/spl.png")}
         style={styles.splashImage}
         resizeMode="contain"
       />

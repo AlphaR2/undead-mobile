@@ -1,6 +1,7 @@
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { Toast } from "@/components/ui/Toast";
 import { dynamicClient } from "@/context/wallet";
+import { MWAProvider } from "@/context/mwa";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -46,55 +47,91 @@ export default function RootLayout() {
 
   return (
     <View style={styles.container}>
+      <StatusBar
+        hidden={true}
+        translucent={false}
+        backgroundColor="transparent"
+      />
+      
       <View style={styles.webViewContainer}>
         <dynamicClient.reactNative.WebView />
       </View>
       
       {/* Main App Content */}
       <GestureHandlerRootView style={styles.appContainer}>
-        <ContextProvider>
-          <SafeAreaProvider>
-            <ThemeProvider>
-              <ErrorBoundary>
-                <Stack screenOptions={{ headerShown: false }}>
-                  {/* Splash screen (entry point) */}
-                  <Stack.Screen
-                    name="index"
-                    options={{
-                      gestureEnabled: false,
-                      animation: "none",
+        <MWAProvider>
+          <ContextProvider>
+            <SafeAreaProvider>
+              <ThemeProvider>
+                <ErrorBoundary>
+                  <Stack 
+                    screenOptions={{ 
+                      headerShown: false,
+                      statusBarHidden: true,
+                      statusBarTranslucent: false,
                     }}
-                  />
-                  {/* Onboarding flow */}
-                  <Stack.Screen
-                    name="trailer"
-                    options={{
-                      gestureEnabled: false,
-                      animation: "fade",
-                      presentation: "fullScreenModal",
-                    }}
-                  />
-                  {/* wallet connect will be in intro */}
-                  <Stack.Screen name="intro" />
-                  <Stack.Screen name="guide" />
-                  <Stack.Screen name="warrior-creation" />
-                  {/* Main app tabs */}
-                  <Stack.Screen name="(tabs)" />
-                  {/* 404 page */}
-                  <Stack.Screen name="+not-found" />
-                </Stack>
-                <StatusBar
-                  style="light"
-                  backgroundColor="#000000"
-                  translucent={false}
-                />
-                
-                {/* Global toast notifications */}
-                <Toast />
-              </ErrorBoundary>
-            </ThemeProvider>
-          </SafeAreaProvider>
-        </ContextProvider>
+                  >
+                    {/* Splash screen (entry point) */}
+                    <Stack.Screen
+                      name="index"
+                      options={{
+                        gestureEnabled: false,
+                        animation: "none",
+                        statusBarHidden: true,
+                      }}
+                    />
+                    {/* Onboarding flow */}
+                    <Stack.Screen
+                      name="trailer"
+                      options={{
+                        gestureEnabled: false,
+                        animation: "fade",
+                        presentation: "fullScreenModal",
+                        statusBarHidden: true,
+                      }}
+                    />
+                    {/* wallet connect will be in intro */}
+                    <Stack.Screen 
+                      name="intro"
+                      options={{
+                        statusBarHidden: true,
+                      }}
+                    />
+                    <Stack.Screen 
+                      name="guide"
+                      options={{
+                        statusBarHidden: true,
+                      }}
+                    />
+                    <Stack.Screen 
+                      name="warrior-creation"
+                      options={{
+                        statusBarHidden: true,
+                      }}
+                    />
+                    {/* Main app tabs */}
+                    <Stack.Screen 
+                      name="(tabs)"
+                      options={{
+                        statusBarHidden: true,
+                      }}
+                    />
+                    {/* 404 page */}
+                    <Stack.Screen 
+                      name="+not-found"
+                      options={{
+                        statusBarHidden: true,
+                      }}
+                    />
+                  </Stack>
+                  
+                  {/* Global toast notifications */}
+                  <Toast />
+                </ErrorBoundary>
+              </ThemeProvider>
+            </SafeAreaProvider>
+          </ContextProvider>
+        </MWAProvider>
       </GestureHandlerRootView>
     </View>
   );

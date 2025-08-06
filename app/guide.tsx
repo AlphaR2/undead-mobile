@@ -2,7 +2,7 @@ import { CreateContext } from "@/context/Context";
 import ChooseName from "@/components/ChooseName";
 import GameCardCarousel from "@/components/GameCard/GameCardCarousel";
 import GameCardIntro from "@/components/GameCard/Intro";
-import CharacterCarousel from "@/components/GuideCarousel";
+import CharacterSelection from "@/components/GuideCarousel";
 import PersonaSelectionScreen from "@/components/Persona";
 import WarriorProfileSetup from "@/components/warrior/WarriorProfileSetup";
 import { GameFonts } from "@/constants/GameFonts";
@@ -19,13 +19,20 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+
+// Get screen dimensions and handle landscape properly
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+const IS_LANDSCAPE = SCREEN_WIDTH > SCREEN_HEIGHT;
+
 //bg
 const WELCOME_BACKGROUND =
   "https://sapphire-geographical-goat-695.mypinata.cloud/ipfs/bafybeie3ioopzpq2s5z45csnm4comlrhjxzziislwxyfawz5cjzdh6smx4";
 
 const SELECTION_BACKGROUND =
   "https://sapphire-geographical-goat-695.mypinata.cloud/ipfs/bafybeiaqhe26zritbjrhf7vaocixy22ep2ejxx6rawqlonjlqskywqcobu";
+
+  const PERSONA_BACKGROUND =
+  "https://sapphire-geographical-goat-695.mypinata.cloud/ipfs/bafybeiey35dg77o4ym275hr62vdc2minsqno3fagnkx7lti4qowai6ezim";
 
 // Guide data
 const GUIDES = [
@@ -157,7 +164,7 @@ const GuideSelection = () => {
       <ImageBackground
         source={{ uri: WELCOME_BACKGROUND }}
         style={styles.backgroundImage}
-        resizeMode="contain"
+        resizeMode="cover" 
       >
         <View style={styles.overlay} />
 
@@ -212,10 +219,11 @@ const GuideSelection = () => {
       <ImageBackground
         source={{ uri: SELECTION_BACKGROUND }}
         style={styles.backgroundImage}
-        resizeMode="contain"
+        resizeMode="cover"
       >
+        <View style={styles.overlay2} />
         <SafeAreaView style={styles.content}>
-          <View className="flex-1  text-center">
+          <View style={styles.selectionContainer}>
             <Animated.View
               style={[
                 styles.selectionHeader,
@@ -224,26 +232,38 @@ const GuideSelection = () => {
                   transform: [{ translateY: slideAnim }],
                 },
               ]}
-              className="border border-red-400"
             >
-              <Text className="text-center text-white">
-                Select a tour guide
-              </Text>
+              <Text style={styles.headerTitle}>Choose your guide</Text>
             </Animated.View>
 
-            <CharacterCarousel />
+            <View style={styles.carouselWrapper}>
+              <CharacterSelection />
+            </View>
           </View>
         </SafeAreaView>
       </ImageBackground>
     </View>
   );
+  
+
   const renderPersonaScreen = () => {
-    return (
-      <View style={styles.container}>
-        <PersonaSelectionScreen />
-      </View>
-    );
-  };
+  return (
+    <View style={styles.container}>
+      <StatusBar hidden />
+      <ImageBackground
+        source={{ uri: PERSONA_BACKGROUND }}
+        style={styles.backgroundImage}
+        resizeMode="cover"
+      >
+        <View style={styles.overlay3} />
+        <SafeAreaView style={styles.content}>
+          <PersonaSelectionScreen />
+        </SafeAreaView>
+      </ImageBackground>
+    </View>
+  );
+};
+ 
 
   const renderInputScreen = () => {
     return (
@@ -252,8 +272,7 @@ const GuideSelection = () => {
         <ImageBackground
           source={{ uri: SELECTION_BACKGROUND }}
           style={styles.backgroundImage}
-          resizeMode="contain"
-          className=""
+          resizeMode="cover" // Changed to cover
         >
           <SafeAreaView style={styles.content}>
             <Animated.View
@@ -264,36 +283,38 @@ const GuideSelection = () => {
                   transform: [{ translateY: slideAnim }],
                 },
               ]}
-            ></Animated.View>
-
-            <ChooseName />
+            />
+            <View style={styles.nameInputWrapper}>
+              <ChooseName />
+            </View>
           </SafeAreaView>
         </ImageBackground>
       </View>
     );
   };
+  
   const renderGameCardIntroScreen = () => {
     return <GameCardIntro />;
   };
+  
   const renderGameCardCarouselScreen = () => {
     return <GameCardCarousel />;
   };
+  
   const renderWarriorProfileSetupScreen = () => {
     return (
-      <ImageBackground
-        source={{
-          uri: "https://sapphire-geographical-goat-695.mypinata.cloud/ipfs/bafybeiaqhe26zritbjrhf7vaocixy22ep2ejxx6rawqlonjlqskywqcobu",
-        }}
-        resizeMode="cover"
-        className="w-full  z-40"
-        style={{
-          height: SCREEN_HEIGHT * 1.3, // Use style prop for dynamic height
-          width: "100%",
-        }}
-      >
-        <View className="absolute inset-0 bg-black opacity-50"></View>
-        <WarriorProfileSetup />
-      </ImageBackground>
+      <View style={styles.container}>
+        <ImageBackground
+          source={{
+            uri: "https://sapphire-geographical-goat-695.mypinata.cloud/ipfs/bafybeiaqhe26zritbjrhf7vaocixy22ep2ejxx6rawqlonjlqskywqcobu",
+          }}
+          resizeMode="cover" // Changed to cover
+          style={styles.backgroundImage}
+        >
+          <View style={styles.overlay} />
+          <WarriorProfileSetup />
+        </ImageBackground>
+      </View>
     );
   };
 
@@ -315,19 +336,28 @@ const GuideSelection = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: "#1a1a1a",
   },
   backgroundImage: {
+    flex: 1,
     width: "100%",
-    height: SCREEN_HEIGHT * 1.3,
+    height: "125%",
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+  },
+  overlay2: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+  },
+  overlay3: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.79)",
   },
   content: {
     flex: 1,
-    paddingHorizontal: 2,
+    paddingHorizontal: IS_LANDSCAPE ? 40 : 20,
   },
 
   // Welcome Screen Styles
@@ -335,17 +365,19 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    paddingVertical: IS_LANDSCAPE ? 20 : 40,
   },
   welcomeContainer: {
     alignItems: "center",
-    paddingHorizontal: 2,
-    marginBottom: 30, // Reduced space between text and button
+    paddingHorizontal: 20,
+    marginBottom: IS_LANDSCAPE ? 20 : 30,
   },
   titleContainer: {
-    marginBottom: 20,
+    marginBottom: IS_LANDSCAPE ? 15 : 20,
+    alignItems: "center",
   },
   welcomeTitle: {
-    fontSize: 35,
+    fontSize: IS_LANDSCAPE ? 28 : 35,
     color: "#cd7f32",
     textAlign: "center",
     textShadowColor: "#000",
@@ -353,7 +385,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 6,
   },
   titleUnderline: {
-    width: SCREEN_WIDTH * 0.8,
+    width: SCREEN_WIDTH * (IS_LANDSCAPE ? 0.6 : 0.8),
     height: 3,
     backgroundColor: "#cd7f32",
     marginTop: 15,
@@ -365,29 +397,45 @@ const styles = StyleSheet.create({
   welcomeTextContainer: {
     alignItems: "center",
     paddingHorizontal: 20,
+    maxWidth: IS_LANDSCAPE ? SCREEN_WIDTH * 0.7 : SCREEN_WIDTH * 0.9,
   },
   welcomeText: {
-    fontSize: 16,
+    fontSize: IS_LANDSCAPE ? 14 : 16,
     color: "#E0E0E0",
     textAlign: "center",
-    lineHeight: 24,
+    lineHeight: IS_LANDSCAPE ? 20 : 24,
   },
 
   // Selection Screen Styles
+  selectionContainer: {
+    flex: 1,
+    justifyContent: "space-between",
+  },
   selectionHeader: {
     alignItems: "center",
-    paddingVertical: 5,
+    paddingVertical: IS_LANDSCAPE ? 10 : 20,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: IS_LANDSCAPE ? 20 : 24,
     color: "#E0E0E0",
     textAlign: "center",
+    fontWeight: "bold",
+  },
+  carouselWrapper: {
+    flex: 1,
+    justifyContent: "center",
+    paddingVertical: IS_LANDSCAPE ? 10 : 20,
+  },
+  nameInputWrapper: {
+    flex: 1,
+    justifyContent: "center",
+    paddingVertical: IS_LANDSCAPE ? 20 : 40,
   },
   selectionContent: {
     flex: 1,
   },
   carouselContainer: {
-    height: 200,
+    height: IS_LANDSCAPE ? 150 : 200,
     marginBottom: 20,
   },
   carousel: {
@@ -397,23 +445,23 @@ const styles = StyleSheet.create({
     width: SCREEN_WIDTH,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 40,
+    paddingHorizontal: IS_LANDSCAPE ? 60 : 40,
   },
   guideAvatar: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: IS_LANDSCAPE ? 100 : 120,
+    height: IS_LANDSCAPE ? 100 : 120,
+    borderRadius: IS_LANDSCAPE ? 50 : 60,
     borderWidth: 3,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(0, 0, 0, 0.5)",
-    marginBottom: 20,
+    marginBottom: IS_LANDSCAPE ? 15 : 20,
   },
   guideInitial: {
-    fontSize: 48,
+    fontSize: IS_LANDSCAPE ? 40 : 48,
   },
   guideName: {
-    fontSize: 18,
+    fontSize: IS_LANDSCAPE ? 16 : 18,
     color: "#E0E0E0",
     textAlign: "center",
   },
@@ -427,66 +475,66 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(205, 127, 50, 0.1)",
     borderWidth: 2,
     borderRadius: 15,
-    padding: 20,
+    padding: IS_LANDSCAPE ? 15 : 20,
     marginHorizontal: 10,
-    marginBottom: 20, // Space for button below
+    marginBottom: IS_LANDSCAPE ? 15 : 20,
   },
   detailsTitle: {
-    fontSize: 20,
+    fontSize: IS_LANDSCAPE ? 18 : 20,
     color: "#cd7f32",
     textAlign: "center",
     marginBottom: 5,
   },
   detailsType: {
-    fontSize: 16,
+    fontSize: IS_LANDSCAPE ? 14 : 16,
     textAlign: "center",
-    marginBottom: 15,
+    marginBottom: IS_LANDSCAPE ? 10 : 15,
   },
   detailsDescription: {
-    fontSize: 14,
+    fontSize: IS_LANDSCAPE ? 12 : 14,
     color: "#E0E0E0",
     textAlign: "center",
-    lineHeight: 20,
-    marginBottom: 20,
+    lineHeight: IS_LANDSCAPE ? 16 : 20,
+    marginBottom: IS_LANDSCAPE ? 15 : 20,
     fontStyle: "italic",
   },
   detailsLabel: {
-    fontSize: 14,
+    fontSize: IS_LANDSCAPE ? 12 : 14,
     color: "#cd7f32",
     marginBottom: 5,
   },
   detailsValue: {
-    fontSize: 14,
+    fontSize: IS_LANDSCAPE ? 12 : 14,
     color: "#C0C0C0",
-    lineHeight: 18,
+    lineHeight: IS_LANDSCAPE ? 16 : 18,
   },
 
   // Buttons
   buttonContainer: {
     alignItems: "center",
-    paddingVertical: 10, // Reduced padding
+    paddingVertical: IS_LANDSCAPE ? 15 : 20,
   },
   nextButton: {
     backgroundColor: "#121212",
-    paddingHorizontal: 40,
-    paddingVertical: 16,
+    paddingHorizontal: IS_LANDSCAPE ? 35 : 40,
+    paddingVertical: IS_LANDSCAPE ? 12 : 16,
     borderRadius: 25,
     borderWidth: 2,
     borderColor: "#cd7f32",
-    minWidth: 200,
+    minWidth: IS_LANDSCAPE ? 180 : 200,
     alignItems: "center",
   },
   confirmButton: {
     backgroundColor: "#121212",
-    paddingHorizontal: 40,
-    paddingVertical: 16,
+    paddingHorizontal: IS_LANDSCAPE ? 35 : 40,
+    paddingVertical: IS_LANDSCAPE ? 12 : 16,
     borderRadius: 25,
     borderWidth: 2,
-    minWidth: 200,
+    minWidth: IS_LANDSCAPE ? 180 : 200,
     alignItems: "center",
   },
   buttonText: {
-    fontSize: 16,
+    fontSize: IS_LANDSCAPE ? 14 : 16,
     color: "#cd7f32",
     textAlign: "center",
     letterSpacing: 1,

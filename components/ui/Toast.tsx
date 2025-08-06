@@ -1,11 +1,3 @@
-// import { toast } from './components/ui/Toast';
-
-// // Anywhere in your app:
-// toast.success('Warrior Created!', 'Your undead warrior is now on-chain');
-// toast.error('Connection Failed', 'Could not connect to Solana network');
-// toast.warning('Low Balance', 'You need more SOL for this transaction');
-// toast.info('Battle Starting', 'Prepare for combat!');
-
 import React, { useEffect, useState } from "react";
 import {
   Animated,
