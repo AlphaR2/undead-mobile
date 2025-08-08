@@ -33,7 +33,7 @@ yarn-error.*
 # local env files
 .env*.local
 .env
-# android/
+android/
 idl/
 
 
@@ -41,6 +41,6 @@ idl/
 *.tsbuildinfo
 
 app-example
-# /android
-# /ios
+/android
+/ios
 /idl
