@@ -1,8 +1,8 @@
 import "@getpara/react-native-wallet/shim";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { Toast } from "@/components/ui/Toast";
-import { PrivyProvider } from "@privy-io/expo";
-import Constants from "expo-constants";
+import { MWAProvider } from "@/context/mwa";
+import { dynamicClient } from "@/context/wallet";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -13,7 +13,8 @@ import "react-native-reanimated";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "../global.css";
 // Theme provider
-import ContextProvider from "@/Context/Context";
+import ContextProvider from "@/context/Context";
+import { StyleSheet, View } from "react-native";
 import { ThemeProvider } from "./providers/ThemeProvider";
 
 // Prevent the splash screen from auto-hiding
@@ -74,81 +75,113 @@ export default function RootLayout() {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <ContextProvider>
-        <SafeAreaProvider>
-          <PrivyProvider
-            appId={privyAppId}
-            clientId={privyClientId}
-            config={{
-              embedded: {
-                solana: {
-                  createOnLogin: "users-without-wallets",
-                },
-              },
-            }}
-          >
-            <ThemeProvider>
-              <ErrorBoundary>
-                <Stack screenOptions={{ headerShown: false }}>
-                  {/* Splash screen (entry point) */}
-                  <Stack.Screen
-                    name="index"
-                    options={{
-                      gestureEnabled: false,
-                      animation: "none",
-                    }}
-                  />
-                  {/* Onboarding flow */}
-                  <Stack.Screen
-                    name="trailer"
-                    options={{
-                      gestureEnabled: false,
-                      animation: "fade",
-                      presentation: "fullScreenModal",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="intro"
-                    options={{
-                      animation: "slide_from_right",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="guide"
-                    options={{
-                      animation: "slide_from_right",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="warrior-creation"
-                    options={{
-                      animation: "slide_from_right",
-                    }}
-                  />
-                  {/* Main app tabs */}
-                  <Stack.Screen
-                    name="(tabs)"
-                    options={{
-                      animation: "fade",
-                    }}
-                  />
-                  {/* 404 page */}
-                  <Stack.Screen name="+not-found" />
-                </Stack>
-                <StatusBar
-                  style="light"
-                  backgroundColor="#000000"
-                  translucent={false}
-                />
+    <View style={styles.container}>
+      <StatusBar
+        hidden={true}
+        translucent={false}
+        backgroundColor="transparent"
+      />
 
-                {/* Global toast notifications */}
-                <Toast />
-              </ErrorBoundary>
-            </ThemeProvider>
-          </PrivyProvider>
-        </SafeAreaProvider>
-      </ContextProvider>
-    </GestureHandlerRootView>
+      <View style={styles.webViewContainer}>
+        <dynamicClient.reactNative.WebView />
+      </View>
+
+      {/* Main App Content */}
+      <GestureHandlerRootView style={styles.appContainer}>
+        <MWAProvider>
+          <ContextProvider>
+            <SafeAreaProvider>
+              <ThemeProvider>
+                <ErrorBoundary>
+                  <Stack
+                    screenOptions={{
+                      headerShown: false,
+                      statusBarHidden: true,
+                      statusBarTranslucent: false,
+                    }}
+                  >
+                    {/* Splash screen (entry point) */}
+                    <Stack.Screen
+                      name="index"
+                      options={{
+                        gestureEnabled: false,
+                        animation: "none",
+                        statusBarHidden: true,
+                      }}
+                    />
+                    {/* Onboarding flow */}
+                    <Stack.Screen
+                      name="trailer"
+                      options={{
+                        gestureEnabled: false,
+                        animation: "fade",
+                        presentation: "fullScreenModal",
+                        statusBarHidden: true,
+                      }}
+                    />
+                    {/* wallet connect will be in intro */}
+                    <Stack.Screen
+                      name="intro"
+                      options={{
+                        statusBarHidden: true,
+                      }}
+                    />
+                    <Stack.Screen
+                      name="guide"
+                      options={{
+                        statusBarHidden: true,
+                      }}
+                    />
+                    <Stack.Screen
+                      name="warrior-creation"
+                      options={{
+                        statusBarHidden: true,
+                      }}
+                    />
+                    {/* Main app tabs */}
+                    <Stack.Screen
+                      name="(tabs)"
+                      options={{
+                        statusBarHidden: true,
+                      }}
+                    />
+                    {/* 404 page */}
+                    <Stack.Screen
+                      name="+not-found"
+                      options={{
+                        statusBarHidden: true,
+                      }}
+                    />
+                  </Stack>
+
+                  {/* Global toast notifications */}
+                  <Toast />
+                </ErrorBoundary>
+              </ThemeProvider>
+            </SafeAreaProvider>
+          </ContextProvider>
+        </MWAProvider>
+      </GestureHandlerRootView>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    position: "relative",
+  },
+  webViewContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: -1, // Behind everything
+    opacity: 0, // Make it invisible but functional
+  },
+  appContainer: {
+    flex: 1,
+    zIndex: 1, // Above the WebView
+  },
+});

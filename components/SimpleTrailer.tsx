@@ -17,7 +17,7 @@ interface TrailerProps {
 }
 
 const VIDEO_URL =
-  "https://sapphire-geographical-goat-695.mypinata.cloud/ipfs/bafybeig3gf34gl6frkd36xdcosb53s4hg5cjyf6tdcoa2lneqgonok3cme";
+  "https://sapphire-geographical-goat-695.mypinata.cloud/ipfs/bafybeid2nile475xfljxln4oki2wcymt7ci6tyrjnl543nibzem5tjyque";
 const SKIP_BUTTON_DELAY = 15000;
 
 const Trailer: React.FC<TrailerProps> = ({ onComplete }) => {
