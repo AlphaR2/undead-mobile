@@ -1,9 +1,18 @@
-// Import essential polyfills
 import { Buffer } from "buffer";
 import "react-native-get-random-values";
 
-global.TextEncoder = require('text-encoding').TextEncoder
+// Set up global Buffer
 global.Buffer = Buffer;
 
-// Then import the expo router
+Buffer.prototype.subarray = function subarray(begin, end) {
+  const result = Uint8Array.prototype.subarray.apply(this, [begin, end]);
+  Object.setPrototypeOf(result, Buffer.prototype);
+  return result;
+};
+
+// Set up TextEncoder
+global.TextEncoder = require("text-encoding").TextEncoder;
+
+global.assert = require("assert");
+
 import "expo-router/entry";

@@ -11,6 +11,7 @@ if (!dynamicId) {
 
 export const dynamicClient = createClient({
   environmentId: dynamicId || "",
+  
 })
   .extend(
     ReactNativeExtension({

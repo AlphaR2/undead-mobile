@@ -1,57 +1,16 @@
 import { CreateContext } from "@/context/Context";
+import { Guides as characters } from "@/types/mobile";
 import React, { useContext, useState } from "react";
-import {
-  Dimensions,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-
-const characters = [
-  {
-    id: "1",
-    name: "JANUS THE BUILDER",
-    title: "Validator Master",
-    description:
-      "I am Janus, Master of the Foundation. I build the very bedrock upon which this realm stands. Through me, you'll understand how consensus creates unshakeable truth.",
-    recommendedFor: "Complete beginners who want solid fundamentals",
-  },
-  {
-    id: "2",
-    name: "JACOB THE ORACLE",
-    title: "Knowledge Keeper",
-    description:
-      "I am Jacob, Keeper of Ancient Wisdom. The deepest secrets of this realm flow through my consciousness like rivers of pure knowledge.",
-    recommendedFor: "Technical backgrounds who want comprehensive understanding",
-  },
-  {
-    id: "3",
-    name: "GUILLAUME THE GUARDIAN",
-    title: "Protector of Assets",
-    description:
-      "I am Guillaume, Shield of the Realm. I guard against the dark forces that would steal your digital treasures and corrupt your transactions.",
-    recommendedFor: "Security-conscious learners who want to stay safe",
-  },
-  {
-    id: "4",
-    name: "BRIM THE DAEMON",
-    title: "Code Compiler",
-    description:
-      "I am Brim, Flame of Efficiency. I transform raw code into blazing reality and optimize every process until it burns with perfect precision.",
-    recommendedFor: "Developers and power users who want to build",
-  },
-];
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const CharacterSelection = () => {
-  const { 
-    setCurrentOnboardingScreen,
-    selectedGuide,
-    setSelectedGuide 
-  } = useContext(CreateContext).onboarding;
-  
-  const [selectedIndex, setSelectedIndex] = useState(selectedGuide ? 
-    characters.findIndex(char => char.id === selectedGuide.id) : 0
+  const { setCurrentOnboardingScreen, selectedGuide, setSelectedGuide } =
+    useContext(CreateContext).onboarding;
+
+  const [selectedIndex, setSelectedIndex] = useState(
+    selectedGuide
+      ? characters.findIndex((char) => char.id === selectedGuide.id)
+      : 0
   );
 
   const handleCharacterSelect = (index: number) => {
@@ -60,13 +19,13 @@ const CharacterSelection = () => {
 
   const handleConfirm = () => {
     const selectedCharacter = characters[selectedIndex];
-    
+
     // SAVE THE SELECTED GUIDE TO CONTEXT
     setSelectedGuide(selectedCharacter);
-    
+
     // MOVE TO PERSONA SELECTION
     setCurrentOnboardingScreen("persona");
-    
+
     console.log("Selected guide saved:", selectedCharacter.name);
   };
 

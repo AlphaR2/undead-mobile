@@ -1,7 +1,7 @@
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { Toast } from "@/components/ui/Toast";
-import { dynamicClient } from "@/context/wallet";
 import { MWAProvider } from "@/context/mwa";
+import { dynamicClient } from "@/context/wallet";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -13,7 +13,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import "../global.css";
 // Theme provider
 import ContextProvider from "@/context/Context";
-import { View, StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { ThemeProvider } from "./providers/ThemeProvider";
 
 // Prevent the splash screen from auto-hiding
@@ -52,11 +52,11 @@ export default function RootLayout() {
         translucent={false}
         backgroundColor="transparent"
       />
-      
+
       <View style={styles.webViewContainer}>
         <dynamicClient.reactNative.WebView />
       </View>
-      
+
       {/* Main App Content */}
       <GestureHandlerRootView style={styles.appContainer}>
         <MWAProvider>
@@ -64,8 +64,8 @@ export default function RootLayout() {
             <SafeAreaProvider>
               <ThemeProvider>
                 <ErrorBoundary>
-                  <Stack 
-                    screenOptions={{ 
+                  <Stack
+                    screenOptions={{
                       headerShown: false,
                       statusBarHidden: true,
                       statusBarTranslucent: false,
@@ -91,40 +91,40 @@ export default function RootLayout() {
                       }}
                     />
                     {/* wallet connect will be in intro */}
-                    <Stack.Screen 
+                    <Stack.Screen
                       name="intro"
                       options={{
                         statusBarHidden: true,
                       }}
                     />
-                    <Stack.Screen 
+                    <Stack.Screen
                       name="guide"
                       options={{
                         statusBarHidden: true,
                       }}
                     />
-                    <Stack.Screen 
+                    <Stack.Screen
                       name="warrior-creation"
                       options={{
                         statusBarHidden: true,
                       }}
                     />
                     {/* Main app tabs */}
-                    <Stack.Screen 
+                    <Stack.Screen
                       name="(tabs)"
                       options={{
                         statusBarHidden: true,
                       }}
                     />
                     {/* 404 page */}
-                    <Stack.Screen 
+                    <Stack.Screen
                       name="+not-found"
                       options={{
                         statusBarHidden: true,
                       }}
                     />
                   </Stack>
-                  
+
                   {/* Global toast notifications */}
                   <Toast />
                 </ErrorBoundary>
@@ -140,10 +140,10 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    position: 'relative',
+    position: "relative",
   },
   webViewContainer: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,

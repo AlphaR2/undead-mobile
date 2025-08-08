@@ -1,4 +1,3 @@
-import { CreateContext } from "@/context/Context";
 import ChooseName from "@/components/ChooseName";
 import GameCardCarousel from "@/components/GameCard/GameCardCarousel";
 import GameCardIntro from "@/components/GameCard/Intro";
@@ -6,6 +5,7 @@ import CharacterSelection from "@/components/GuideCarousel";
 import PersonaSelectionScreen from "@/components/Persona";
 import WarriorProfileSetup from "@/components/warrior/WarriorProfileSetup";
 import { GameFonts } from "@/constants/GameFonts";
+import { CreateContext } from "@/context/Context";
 import { router } from "expo-router";
 import React, { useContext, useEffect, useState } from "react";
 import {
@@ -31,8 +31,11 @@ const WELCOME_BACKGROUND =
 const SELECTION_BACKGROUND =
   "https://sapphire-geographical-goat-695.mypinata.cloud/ipfs/bafybeiaqhe26zritbjrhf7vaocixy22ep2ejxx6rawqlonjlqskywqcobu";
 
-  const PERSONA_BACKGROUND =
+const PERSONA_BACKGROUND =
   "https://sapphire-geographical-goat-695.mypinata.cloud/ipfs/bafybeiey35dg77o4ym275hr62vdc2minsqno3fagnkx7lti4qowai6ezim";
+
+const PROFILE_BACKGROUND =
+  "https://sapphire-geographical-goat-695.mypinata.cloud/ipfs/bafybeigwpyo3f6gpqwf2xw3qntopgg7rlvescdgiu53ebktsk5lawgpfle";
 
 // Guide data
 const GUIDES = [
@@ -50,11 +53,11 @@ const GUIDES = [
   },
   {
     id: 2,
-    name: "JACOB THE ORACLE",
+    name: "JAREK THE ORACLE",
     title: "Knowledge Keeper",
     type: "Advanced",
     description:
-      "I am Jacob, Keeper of Ancient Wisdom. The deepest secrets of this realm flow through my consciousness like rivers of pure knowledge.",
+      "I am Jarek, Keeper of Ancient Wisdom. The deepest secrets of this realm flow through my consciousness like rivers of pure knowledge.",
     specialty: "Advanced concepts, technical deep-dives, ecosystem insights",
     recommendedFor:
       "Technical backgrounds who want comprehensive understanding",
@@ -64,11 +67,11 @@ const GUIDES = [
   },
   {
     id: 3,
-    name: "GUILLAUME THE GUARDIAN",
+    name: "GAIUS THE GUARDIAN",
     title: "Protector of Assets",
     type: "Security",
     description:
-      "I am Guillaume, Shield of the Realm. I guard against the dark forces that would steal your digital treasures and corrupt your transactions.",
+      "I am Gaius, Shield of the Realm. I guard against the dark forces that would steal your digital treasures and corrupt your transactions.",
     specialty: "Security, wallets, protection strategies, best practices",
     recommendedFor: "Security-conscious learners who want to stay safe",
     learningStyle: "Protective approach, risk awareness, practical safety",
@@ -76,11 +79,11 @@ const GUIDES = [
   },
   {
     id: 4,
-    name: "BRIM THE DAEMON",
+    name: "BRYN THE DAEMON",
     title: "Code Compiler",
     type: "Technical",
     description:
-      "I am Brim, Flame of Efficiency. I transform raw code into blazing reality and optimize every process until it burns with perfect precision.",
+      "I am Bryn, Flame of Efficiency. I transform raw code into blazing reality and optimize every process until it burns with perfect precision.",
     specialty: "Technical implementation, smart contracts, development",
     recommendedFor: "Developers and power users who want to build",
     learningStyle:
@@ -164,7 +167,7 @@ const GuideSelection = () => {
       <ImageBackground
         source={{ uri: WELCOME_BACKGROUND }}
         style={styles.backgroundImage}
-        resizeMode="cover" 
+        resizeMode="cover"
       >
         <View style={styles.overlay} />
 
@@ -244,36 +247,35 @@ const GuideSelection = () => {
       </ImageBackground>
     </View>
   );
-  
 
   const renderPersonaScreen = () => {
-  return (
-    <View style={styles.container}>
-      <StatusBar hidden />
-      <ImageBackground
-        source={{ uri: PERSONA_BACKGROUND }}
-        style={styles.backgroundImage}
-        resizeMode="cover"
-      >
-        <View style={styles.overlay3} />
-        <SafeAreaView style={styles.content}>
-          <PersonaSelectionScreen />
-        </SafeAreaView>
-      </ImageBackground>
-    </View>
-  );
-};
- 
+    return (
+      <View style={styles.container}>
+        <StatusBar hidden />
+        <ImageBackground
+          source={{ uri: PERSONA_BACKGROUND }}
+          style={styles.backgroundImage}
+          resizeMode="cover"
+        >
+          <View style={styles.overlay3} />
+          <SafeAreaView style={styles.content}>
+            <PersonaSelectionScreen />
+          </SafeAreaView>
+        </ImageBackground>
+      </View>
+    );
+  };
 
   const renderInputScreen = () => {
     return (
       <View style={styles.container}>
         <StatusBar hidden />
         <ImageBackground
-          source={{ uri: SELECTION_BACKGROUND }}
+          source={{ uri: PROFILE_BACKGROUND }}
           style={styles.backgroundImage}
-          resizeMode="cover" // Changed to cover
+          resizeMode="cover" 
         >
+          <View style={styles.overlay} />
           <SafeAreaView style={styles.content}>
             <Animated.View
               style={[
@@ -292,15 +294,15 @@ const GuideSelection = () => {
       </View>
     );
   };
-  
+
   const renderGameCardIntroScreen = () => {
     return <GameCardIntro />;
   };
-  
+
   const renderGameCardCarouselScreen = () => {
     return <GameCardCarousel />;
   };
-  
+
   const renderWarriorProfileSetupScreen = () => {
     return (
       <View style={styles.container}>

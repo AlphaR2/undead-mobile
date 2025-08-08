@@ -1,66 +1,6 @@
-import React, { useState, createContext } from "react";
-
-// Guide interface
-interface Guide {
-  id: string;
-  name: string;
-  title: string;
-  description: string;
-  recommendedFor: string;
-}
-
-// Persona enum
-enum UserPersona {
-  TreasureHunter = "TreasureHunter",
-  BoneSmith = "BoneSmith",
-  ObsidianProphet = "ObsidianProphet",
-  GraveBaron = "GraveBaron",
-  Demeter = "Demeter",
-  Collector = "Collector",
-  CovenCaller = "CovenCaller",
-  SeerOfAsh = "SeerOfAsh",
-  Cerberus = "Cerberus",
-}
-
-interface ContextTypes {
-  auth: {
-    accessToken: string | null;
-    setAccessToken: React.Dispatch<React.SetStateAction<string | null>>;
-  };
-
-  loader: {
-    isLoading: boolean;
-    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  };
-
-  onboarding: {
-    currentOnboardingScreen: string;
-    setCurrentOnboardingScreen: React.Dispatch<
-      React.SetStateAction<"welcome" | "selection" | "name" | "game-card-intro" | "game-card-carousel" | "warrior-setup" | "persona">
-    >;
-    
-    // Guide selection
-    selectedGuide: Guide | null;
-    setSelectedGuide: React.Dispatch<React.SetStateAction<Guide | null>>;
-    
-    // Persona selection
-    selectedPersona: UserPersona | null;
-    setSelectedPersona: React.Dispatch<React.SetStateAction<UserPersona | null>>;
-    
-    // Player name
-    playerName: string;
-    setPlayerName: React.Dispatch<React.SetStateAction<string>>;
-    
-    // Utility functions
-    getOnboardingData: () => {
-      selectedGuide: Guide | null;
-      selectedPersona: UserPersona | null;
-      playerName: string;
-    };
-    
-    resetOnboarding: () => void;
-  };
-}
+import { ContextTypes, Guide, WarriorType } from "@/types/mobile";
+import { UserPersona } from "@/types/undead";
+import React, { createContext, useState } from "react";
 
 export const CreateContext = createContext({} as ContextTypes);
 
@@ -71,23 +11,34 @@ const ContextProvider = ({
 }>) => {
   // Auth state
   const [accessToken, setAccessToken] = useState<string | null>("");
-  
+
   // Loader state
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Onboarding screen state
   const [currentOnboardingScreen, setCurrentOnboardingScreen] = useState<
-    "welcome" | "selection" | "name" | "game-card-intro" | "game-card-carousel" | "warrior-setup" | "persona"
+    | "welcome"
+    | "selection"
+    | "name"
+    | "game-card-intro"
+    | "game-card-carousel"
+    | "warrior-setup"
+    | "persona"
   >("welcome");
-  
-  // Onboarding data state - THE MISSING PIECES
+
+  // Onboarding data state
   const [selectedGuide, setSelectedGuide] = useState<Guide | null>(null);
-  const [selectedPersona, setSelectedPersona] = useState<UserPersona | null>(null);
+  const [selectedWarriorType, setSelectedWarriorType] =
+    useState<WarriorType | null>(null);
+  const [selectedPersona, setSelectedPersona] = useState<UserPersona | null>(
+    null
+  );
   const [playerName, setPlayerName] = useState<string>("");
 
   // Utility functions
   const getOnboardingData = () => ({
     selectedGuide,
+    selectedWarriorType,
     selectedPersona,
     playerName,
   });
@@ -95,6 +46,7 @@ const ContextProvider = ({
   const resetOnboarding = () => {
     setCurrentOnboardingScreen("welcome");
     setSelectedGuide(null);
+    setSelectedWarriorType(null);
     setSelectedPersona(null);
     setPlayerName("");
   };
@@ -112,6 +64,8 @@ const ContextProvider = ({
           setCurrentOnboardingScreen,
           selectedGuide,
           setSelectedGuide,
+          selectedWarriorType,
+          setSelectedWarriorType,
           selectedPersona,
           setSelectedPersona,
           playerName,
@@ -128,3 +82,4 @@ const ContextProvider = ({
 
 export default ContextProvider;
 export { UserPersona };
+export type { WarriorType };

@@ -1,23 +1,26 @@
-import { RustUndead as UndeadTypes } from "@/types/idlTypes";
-import { AnchorProvider, Program } from "@coral-xyz/anchor";
+import { useMWA } from "@/context/mwa";
+import {
+  getMWAConnection,
+  useMWAAnchorAdapter,
+} from "@/context/mwa/AnchorAdapter";
 import { useDynamic } from "@/context/wallet";
-import { useMWA} from "@/context/mwa";
-import { useMWAAnchorAdapter, getMWAConnection } from "@/context/mwa/AnchorAdapter";
-import { GetCommitmentSignature } from "@magicblock-labs/ephemeral-rollups-sdk";
+import { AnchorProvider, Program } from "@coral-xyz/anchor";
 import {
   Connection,
   PublicKey,
   Transaction,
   VersionedTransaction,
 } from "@solana/web3.js";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { PROGRAM_ID, PROGRAM_IDL, authority } from "../config/program";
 
-type UndeadProgram = Program<UndeadTypes>;
+// Import the TypeScript program type if available
+// If you have target/types/rust_undead.ts, use this:
+// import { RustUndead as RustUndeadProgram } from "../target/types/rust_undead";
+// type UndeadProgram = Program<RustUndeadProgram>;
 
-// ===============================================================================
-// TYPES & INTERFACES FOR PROGRAM
-// ===============================================================================
+// For now, using generic Program type
+type UndeadProgram = Program<any>;
 
 interface WalletInfo {
   publicKey: PublicKey | null;
@@ -33,7 +36,6 @@ interface WalletInfo {
 // ===============================================================================
 // TRANSACTION DEDUPLICATION SYSTEM
 // ===============================================================================
-
 const pendingTransactions = new Set<string>();
 
 const useTransactionDeduplication = () => {
@@ -74,68 +76,48 @@ const useTransactionDeduplication = () => {
 // ===============================================================================
 // UNIFIED WALLET STATE MANAGEMENT
 // ===============================================================================
-
-/**
- * Unified wallet info hook that works with both Dynamic and MWA wallets
- */
 export const useWalletInfo = (): WalletInfo => {
   const dynamic = useDynamic();
   const mwa = useMWA();
   const [connection, setConnection] = useState<Connection | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Early return if no Dynamic primary wallet
-  if (!dynamic.wallets?.primary) { 
-    return {
-      publicKey: null,
-      isConnected: false,
-      isAuthenticated: false,
-      address: null,
-      walletType: null,
-      name: "No wallet connected",
-      isLoading: false,
-      connection: null,
-    };
-  }
+  const dynamicWalletAddress = dynamic.wallets?.primary?.address;
 
-  const dynamicWalletAddress = dynamic.wallets.primary.address;
-
-  // Handle connection setup when wallet becomes available
   useEffect(() => {
     const setupConnection = async () => {
       setIsLoading(true);
-      
+
       try {
         let conn: Connection | null = null;
 
-        // Priority: MWA connection if available
         if (mwa.isConnected && mwa.wallet) {
-          console.log('🔗 [Unified] Setting up MWA connection...');
-          conn = getMWAConnection('devnet');
-        }
-        // Fallback: Dynamic connection
-        else if (dynamic.wallets?.primary && dynamic.sdk.loaded) {
-          console.log('🔗 [Unified] Setting up Dynamic connection...');
+          console.log("🔗 [Unified] Setting up MWA connection...");
+          conn = getMWAConnection("devnet");
+        } else if (dynamic.wallets?.primary && dynamic.sdk.loaded) {
+          console.log("🔗 [Unified] Setting up Dynamic connection...");
           try {
             conn = dynamic.solana.getConnection();
           } catch (error) {
-            console.error('❌ [Unified] Dynamic connection failed:', error);
+            console.error("❌ [Unified] Dynamic connection failed:", error);
             conn = new Connection("https://api.devnet.solana.com", "confirmed");
           }
-        }
-        // No wallet connected
-        else {
+        } else {
           conn = new Connection("https://api.devnet.solana.com", "confirmed");
         }
 
         setConnection(conn);
-        
+
         if (conn) {
-          console.log(`✅ [Unified] Connection established: ${conn.rpcEndpoint}`);
+          console.log(
+            `✅ [Unified] Connection established: ${conn.rpcEndpoint}`
+          );
         }
       } catch (error) {
-        console.error('❌ [Unified] Connection setup failed:', error);
-        setConnection(new Connection("https://api.devnet.solana.com", "confirmed"));
+        console.error("❌ [Unified] Connection setup failed:", error);
+        setConnection(
+          new Connection("https://api.devnet.solana.com", "confirmed")
+        );
       } finally {
         setIsLoading(false);
       }
@@ -150,29 +132,42 @@ export const useWalletInfo = (): WalletInfo => {
   ]);
 
   return useMemo(() => {
+    console.log("🔍 [WalletInfo Debug]", {
+      mwaConnected: mwa.isConnected,
+      mwaWallet: !!mwa.wallet,
+      mwaAddress: mwa.wallet?.address,
+      dynamicLoaded: dynamic.sdk.loaded,
+      dynamicWallet: !!dynamic.wallets?.primary,
+      dynamicAddress: dynamicWalletAddress,
+      dynamicAuth: !!dynamic.auth.authenticatedUser,
+      isLoading,
+    });
+
     // Check MWA wallet first (higher priority)
     if (mwa.isConnected && mwa.wallet) {
+      console.log("✅ [WalletInfo] Using MWA wallet");
       return {
         publicKey: mwa.wallet.publicKey,
         isConnected: true,
-        isAuthenticated: true, // MWA connection implies authentication
+        isAuthenticated: true,
         address: mwa.wallet.address,
         walletType: "mwa",
-        name: `MWA Wallet (${mwa.wallet.label || 'Solana'})`,
+        name: `MWA Wallet (${mwa.wallet.label || "Solana"})`,
         isLoading: false,
         connection,
       };
     }
 
     // Check Dynamic wallet (embedded only)
-    if (dynamic.sdk.loaded && dynamic.wallets?.primary && dynamic.auth.authenticatedUser) {
+    if (
+      dynamic.sdk.loaded &&
+      dynamic.wallets?.primary &&
+      dynamic.auth.authenticatedUser
+    ) {
       const primaryWallet = dynamic.wallets.primary;
-      
-      // Fixed wallet type - only embedded supported
-      const walletType = "dynamic_embedded";
-      const walletName = "Dynamic Embedded Wallet";
-      
-      // Create PublicKey from address
+
+      console.log("✅ [WalletInfo] Using Dynamic embedded wallet");
+
       let publicKey: PublicKey | null = null;
       try {
         publicKey = new PublicKey(primaryWallet.address);
@@ -195,15 +190,16 @@ export const useWalletInfo = (): WalletInfo => {
         isConnected: true,
         isAuthenticated: !!dynamic.auth.authenticatedUser,
         address: primaryWallet.address,
-        walletType,
-        name: walletName,
+        walletType: "dynamic_embedded",
+        name: "Dynamic Embedded Wallet",
         isLoading,
         connection,
       };
     }
 
-    // No wallet connected or still loading
-    if (!dynamic.sdk.loaded || mwa.isCheckingWallets) {
+    // Still loading
+    if (isLoading || !dynamic.sdk.loaded || mwa.isCheckingWallets) {
+      console.log("⏳ [WalletInfo] Still loading wallets...");
       return {
         publicKey: null,
         isConnected: false,
@@ -217,6 +213,7 @@ export const useWalletInfo = (): WalletInfo => {
     }
 
     // No wallet connected
+    console.log("❌ [WalletInfo] No wallet connected");
     return {
       publicKey: null,
       isConnected: false,
@@ -228,268 +225,212 @@ export const useWalletInfo = (): WalletInfo => {
       connection: null,
     };
   }, [
-    // MWA dependencies
     mwa.isConnected,
     mwa.wallet?.address,
     mwa.wallet?.publicKey,
     mwa.wallet?.label,
     mwa.isCheckingWallets,
-    // Dynamic dependencies
     dynamic.sdk.loaded,
     dynamicWalletAddress,
     dynamic.auth.authenticatedUser,
-    // Connection state
     connection,
     isLoading,
   ]);
 };
 
 // ===============================================================================
-// UNIFIED PROGRAM INTEGRATION
+// COMPLETE FIXED PROGRAM HOOK FOLLOWING SOLANA DOCS PATTERN
 // ===============================================================================
-
-/**
- * Unified Undead Program hook that works with both Dynamic and MWA wallets
- */
 export const useUndeadProgram = (): {
   program: UndeadProgram | null;
   isReady: boolean;
   error: string | null;
 } => {
   const dynamic = useDynamic();
-  const wallet = dynamic.wallets.primary;
-  
   const mwa = useMWA();
   const mwaAnchorAdapter = useMWAAnchorAdapter();
-  const { publicKey, isConnected, connection, isLoading, walletType } = useWalletInfo();
+  const { publicKey, isConnected, connection, isLoading, walletType } =
+    useWalletInfo();
   const { executeWithDeduplication } = useTransactionDeduplication();
 
-  const [program, setProgram] = useState<UndeadProgram | null>(null);
-  const [isReady, setIsReady] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Create AnchorProvider following Solana docs pattern
+  const provider = useMemo(() => {
+    if (isLoading || !isConnected || !publicKey || !connection) {
+      return null;
+    }
 
-  useEffect(() => {
-    const initializeProgram = async () => {
-      if (isLoading || !isConnected || !publicKey || !connection || !wallet) {
-        setProgram(null);
-        setIsReady(false);
-        return;
-      }
+    let walletAdapter: any;
 
-      try {
-        setError(null);
-        console.log(`🔧 [Unified Program] Initializing with ${walletType} wallet...`);
+    try {
+      if (walletType === "mwa" && mwaAnchorAdapter) {
+        console.log("🔗 [Program] Using MWA wallet adapter");
 
-        let walletAdapter: any;
-
-        // Create wallet adapter based on wallet type
-        if (walletType === 'mwa' && mwaAnchorAdapter) {
-          // Use MWA adapter
-          walletAdapter = mwaAnchorAdapter;
-          console.log('🔗 [Unified Program] Using MWA wallet adapter');
-        } 
-        else if (walletType === 'dynamic_embedded' && dynamic.wallets?.primary) {
-          // Use Dynamic embedded wallet adapter
-          walletAdapter = {
-            publicKey,
-            
-            signTransaction: async (tx: Transaction | VersionedTransaction) => {
-              const operationKey = `sign_${publicKey.toString()}_${Date.now()}`;
-              
-              return executeWithDeduplication(async () => {
-                const signer = await dynamic.solana.getSigner({wallet});
-                console.log('🔐 [Unified Program] Signing transaction with Dynamic embedded wallet...');
-                return await signer.signTransaction(tx);
-              }, operationKey);
-            },
-            
-            signAllTransactions: async (txs: (Transaction | VersionedTransaction)[]) => {
-              const operationKey = `sign_all_${publicKey.toString()}_${Date.now()}`;
-              
-              return executeWithDeduplication(async () => {
-                const signer = await dynamic.solana.getSigner({wallet});
-                console.log(`🔐 [Unified Program] Signing ${txs.length} transactions with Dynamic embedded wallet...`);
-                
-                const signedTxs = [];
-                for (const tx of txs) {
-                  const signedTx = await signer.signTransaction(tx);
-                  signedTxs.push(signedTx);
-                }
-                return signedTxs;
-              }, operationKey);
-            },
-          };
-          console.log('🔗 [Unified Program] Using Dynamic embedded wallet adapter');
-        } 
-        else {
-          setError(`Unsupported wallet type: ${walletType}`);
-          setProgram(null);
-          setIsReady(false);
-          return;
+        if (!mwaAnchorAdapter.publicKey) {
+          throw new Error("MWA adapter missing publicKey");
+        }
+        if (typeof mwaAnchorAdapter.signTransaction !== "function") {
+          throw new Error("MWA adapter missing signTransaction method");
         }
 
-        // Create Anchor provider
-        const provider = new AnchorProvider(connection, walletAdapter, {
-          commitment: "confirmed",
-          preflightCommitment: "confirmed",
-          skipPreflight: false,
-        });
+        walletAdapter = mwaAnchorAdapter;
+      } else if (
+        walletType === "dynamic_embedded" &&
+        dynamic.wallets?.primary
+      ) {
+        console.log("🔗 [Program] Using Dynamic embedded wallet adapter");
 
-        // Initialize program
-        const idl = PROGRAM_IDL as UndeadTypes;
-        const programInstance = new Program(idl, provider) as UndeadProgram;
-
-        setProgram(programInstance);
-        setIsReady(true);
-
-        console.log(`✅ [Unified Program] Program initialized successfully with ${walletType}:`, {
-          programId: programInstance.programId.toString(),
-          wallet: publicKey.toString(),
-          endpoint: connection.rpcEndpoint,
-        });
-      } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : "Unknown error";
-        console.error(`❌ [Unified Program] Initialization failed with ${walletType}:`, error);
-        setError(errorMsg);
-        setProgram(null);
-        setIsReady(false);
+        const wallet = dynamic.wallets.primary;
+        walletAdapter = {
+          publicKey,
+          signTransaction: async (tx: Transaction | VersionedTransaction) => {
+            const operationKey = `sign_${publicKey.toString()}_${Date.now()}`;
+            return executeWithDeduplication(async () => {
+              const signer = await dynamic.solana.getSigner({ wallet });
+              return await signer.signTransaction(tx);
+            }, operationKey);
+          },
+          signAllTransactions: async (
+            txs: (Transaction | VersionedTransaction)[]
+          ) => {
+            const operationKey = `sign_all_${publicKey.toString()}_${Date.now()}`;
+            return executeWithDeduplication(async () => {
+              const signer = await dynamic.solana.getSigner({ wallet });
+              const signedTxs = [];
+              for (const tx of txs) {
+                const signedTx = await signer.signTransaction(tx);
+                signedTxs.push(signedTx);
+              }
+              return signedTxs;
+            }, operationKey);
+          },
+        };
+      } else {
+        console.warn(`⚠️ [Program] Unsupported wallet type: ${walletType}`);
+        return null;
       }
-    };
 
-    initializeProgram();
+      if (!walletAdapter) {
+        console.error("❌ [Program] Failed to create wallet adapter");
+        return null;
+      }
+
+      // Create AnchorProvider
+      const anchorProvider = new AnchorProvider(connection, walletAdapter, {
+        commitment: "confirmed",
+        preflightCommitment: "confirmed",
+        skipPreflight: false,
+      });
+
+      console.log("✅ [Program] AnchorProvider created successfully");
+      return anchorProvider;
+    } catch (error) {
+      console.error("❌ [Program] Provider creation failed:", error);
+      return null;
+    }
   }, [
     isLoading,
     isConnected,
     publicKey?.toString(),
     connection?.rpcEndpoint,
     walletType,
-    // MWA dependencies
     mwaAnchorAdapter,
-    // Dynamic dependencies
     dynamic.wallets?.primary?.address,
     executeWithDeduplication,
   ]);
 
-  return { program, isReady, error };
-};
-
-// ===============================================================================
-// UNIFIED MAGIC BLOCK PROVIDER
-// ===============================================================================
-
-export const useMagicBlockProvider = (): AnchorProvider | null => {
-  const { publicKey, isConnected, walletType } = useWalletInfo();
-  const dynamic = useDynamic();
-  const wallet = dynamic.wallets.primary;
-  const mwa = useMWA();
-  const { executeWithDeduplication } = useTransactionDeduplication();
-
-  const providerRef = useRef<AnchorProvider | null>(null);
-  const lastConfigRef = useRef<string>("");
-
-  return useMemo(() => {
-    if (!isConnected || !publicKey ||!wallet) {
+  // Create Program instance following Solana docs pattern
+  const undeadProgram = useMemo(() => {
+    if (!provider) {
       return null;
-    }
-
-    // Create cache key for this configuration
-    const currentConfig = `${publicKey.toString()}_${walletType}`;
-
-    // Return cached provider if configuration hasn't changed
-    if (providerRef.current && lastConfigRef.current === currentConfig) {
-      return providerRef.current;
     }
 
     try {
-      let walletAdapter: any;
-
-      if (walletType === 'mwa' && mwa.wallet) {
-        // MWA wallet adapter for MagicBlock
-        walletAdapter = {
-          publicKey,
-          signTransaction: async (tx: Transaction | VersionedTransaction) => {
-            const operationKey = `magicblock_mwa_sign_${publicKey.toString()}_${Date.now()}`;
-
-            return executeWithDeduplication(async () => {
-              console.log("🔐 [MagicBlock] Signing transaction with MWA wallet...");
-              return await mwa.signTransaction(tx);
-            }, operationKey);
-          },
-        };
-      } 
-      else if (walletType === 'dynamic_embedded' && dynamic.wallets?.primary) {
-        // Dynamic embedded wallet adapter for MagicBlock
-        walletAdapter = {
-          publicKey,
-          signTransaction: async (tx: Transaction | VersionedTransaction) => {
-            const operationKey = `magicblock_dynamic_sign_${publicKey.toString()}_${Date.now()}`;
-
-            return executeWithDeduplication(async () => {
-              const signer = await dynamic.solana.getSigner({wallet});
-              console.log("🔐 [MagicBlock] Signing transaction with Dynamic embedded wallet...");
-              return await signer.signTransaction(tx);
-            }, operationKey);
-          },
-        };
-      } 
-      else {
-        return null;
-      }
-
-      // Create MagicBlock connection
-      const magicBlockConnection = createMagicBlockConnection();
-      const provider = new AnchorProvider(magicBlockConnection, walletAdapter, {
-        commitment: "confirmed",
-        preflightCommitment: "confirmed",
-        skipPreflight: false,
+      console.log("🔧 [Program] Creating program instance...");
+      console.log("🔍 [Program] Program Details:", {
+        programId: PROGRAM_ID?.toString(),
+        idlExists: !!PROGRAM_IDL,
+        idlVersion: (PROGRAM_IDL as any)?.version,
+        idlName: (PROGRAM_IDL as any)?.name,
       });
 
-      // Cache the provider
-      providerRef.current = provider;
-      lastConfigRef.current = currentConfig;
+      if (!PROGRAM_IDL) {
+        throw new Error("PROGRAM_IDL is not defined");
+      }
 
-      console.log(`✅ [MagicBlock] Provider created successfully with ${walletType}`);
-      return provider;
-    } catch (error) {
-      console.error(`❌ [MagicBlock] Provider creation failed with ${walletType}:`, error);
+      if (!PROGRAM_ID) {
+        throw new Error("PROGRAM_ID is not defined");
+      }
+
+      // Log IDL structure for debugging
+      const types = (PROGRAM_IDL as any).types || [];
+      console.log("🔍 [Program] IDL Analysis:", {
+        totalTypes: types.length,
+        hasWarriorClass: types.some((t: any) => t.name === "warriorClass"),
+        hasUserPersona: types.some((t: any) => t.name === "userPersona"),
+        typeNames: types.map((t: any) => t.name),
+      });
+
+      // Create Program instance following Solana docs pattern
+      const program = new Program(
+        PROGRAM_IDL as any, // Cast to any to handle TypeScript issues
+        PROGRAM_ID,
+        provider
+      ) as UndeadProgram;
+
+      console.log("✅ [Program] Program instance created successfully:", {
+        programId: program.programId.toString(),
+        wallet: provider.wallet.publicKey.toString(),
+        endpoint: provider.connection.rpcEndpoint,
+      });
+
+      return program;
+    } catch (error: any) {
+      console.error("❌ [Program] Program creation failed:", {
+        message: error?.message,
+        stack: error?.stack,
+        name: error?.name,
+      });
+
+      // Return null instead of throwing to let the hook handle the error state
       return null;
     }
-  }, [
-    isConnected,
-    publicKey?.toString(),
-    walletType,
-    // MWA dependencies
-    mwa.wallet?.address,
-    mwa.signTransaction,
-    // Dynamic dependencies
-    dynamic.wallets?.primary?.address,
-    executeWithDeduplication,
-  ]);
+  }, [provider]);
+
+  // Determine ready state and error
+  const isReady = useMemo(() => {
+    return !!undeadProgram && !!provider;
+  }, [undeadProgram, provider]);
+
+  const error = useMemo(() => {
+    if (isLoading) return null;
+    if (!isConnected) return "Wallet not connected";
+    if (!provider) return "Failed to create provider";
+    if (!undeadProgram) return "Failed to create program instance";
+    return null;
+  }, [isLoading, isConnected, provider, undeadProgram]);
+
+  // Log state changes for debugging
+  useEffect(() => {
+    console.log("🔍 [Program] State Update:", {
+      isReady,
+      error,
+      hasProgram: !!undeadProgram,
+      hasProvider: !!provider,
+      walletType,
+      isConnected,
+    });
+  }, [isReady, error, undeadProgram, provider, walletType, isConnected]);
+
+  return {
+    program: undeadProgram,
+    isReady,
+    error,
+  };
 };
 
 // ===============================================================================
-// EXISTING HOOKS (UPDATED TO WORK WITH UNIFIED SYSTEM)
+// PDA UTILITIES (unchanged)
 // ===============================================================================
-
-export const useWalletAndProgramReady = () => {
-  const { publicKey, isConnected } = useWalletInfo();
-  const program = useUndeadProgram();
-
-  return useMemo(() => {
-    const walletReady = isConnected && publicKey;
-    const programReady = program && program.program?.programId;
-    const bothReady = walletReady && programReady;
-
-    return {
-      walletReady,
-      programReady,
-      bothReady,
-      publicKey,
-      program,
-    };
-  }, [isConnected, publicKey, program?.program?.programId]);
-};
-
 export const usePDAs = (userPublicKey?: PublicKey | null) => {
   return useMemo(() => {
     if (!userPublicKey) {
@@ -574,6 +515,28 @@ export const usePDAs = (userPublicKey?: PublicKey | null) => {
   }, [userPublicKey?.toString()]);
 };
 
+// ===============================================================================
+// UTILITY HOOKS (unchanged)
+// ===============================================================================
+export const useWalletAndProgramReady = () => {
+  const { publicKey, isConnected } = useWalletInfo();
+  const { program, isReady } = useUndeadProgram();
+
+  return useMemo(() => {
+    const walletReady = isConnected && publicKey;
+    const programReady = isReady && program?.programId;
+    const bothReady = walletReady && programReady;
+
+    return {
+      walletReady,
+      programReady,
+      bothReady,
+      publicKey,
+      program,
+    };
+  }, [isConnected, publicKey, isReady, program?.programId]);
+};
+
 export const useCurrentWallet = () => {
   const walletInfo = useWalletInfo();
 
@@ -604,101 +567,4 @@ export const useCurrentWallet = () => {
       isMWA,
     };
   }, [walletInfo]);
-};
-
-// ===============================================================================
-// MAGICBLOCK CONNECTION HELPER
-// ===============================================================================
-
-let magicBlockConnectionCache: Connection | null = null;
-const createMagicBlockConnection = () => {
-  if (!magicBlockConnectionCache) {
-    magicBlockConnectionCache = new Connection(
-      process.env.NEXT_PUBLIC_ER_PROVIDER_ENDPOINT || "https://devnet.magicblock.app/",
-      {
-        wsEndpoint: process.env.NEXT_PUBLIC_ER_WS_ENDPOINT || "wss://devnet.magicblock.app/",
-        commitment: "confirmed",
-      }
-    );
-  }
-  return magicBlockConnectionCache;
-};
-
-// ===============================================================================
-// EPHEMERAL PROGRAM HOOKS (UPDATED)
-// ===============================================================================
-
-export async function sendERTransaction(
-  program: any,
-  methodBuilder: any,
-  signer: PublicKey,
-  provider: AnchorProvider | any,
-  description: string
-): Promise<string> {
-  try {
-    let tx = await methodBuilder.transaction();
-
-    tx.feePayer = provider.wallet.publicKey;
-    tx.recentBlockhash = (await provider.connection.getLatestBlockhash()).blockhash;
-
-    tx = await provider.wallet.signTransaction(tx);
-
-    const rawTx = tx.serialize();
-    const txHash = await provider.connection.sendRawTransaction(rawTx);
-
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      const txCommitSgn = await GetCommitmentSignature(txHash, provider.connection);
-      return txCommitSgn;
-    } catch (commitError: any) {
-      return txHash;
-    }
-  } catch (error: any) {
-    console.error(`❌ [ER] ${description} failed:`, error);
-    throw error;
-  }
-}
-
-export const useEphemeralProgram = (erProgramId?: PublicKey): UndeadProgram | null => {
-  const magicBlockProvider = useMagicBlockProvider();
-
-  return useMemo(() => {
-    if (!magicBlockProvider || !erProgramId) {
-      return null;
-    }
-
-    try {
-      const idl = PROGRAM_IDL as UndeadTypes;
-      const ephemeralProgram = new Program(idl, magicBlockProvider) as UndeadProgram;
-      return ephemeralProgram;
-    } catch (error) {
-      console.error("❌ Error creating ephemeral program instance:", error);
-      return null;
-    }
-  }, [magicBlockProvider, erProgramId?.toString()]);
-};
-
-export const createEphemeralProgram = (erProgramId: PublicKey, wallet: any): UndeadProgram => {
-  const magicBlockConnection = createMagicBlockConnection();
-  const provider = new AnchorProvider(magicBlockConnection, wallet, {
-    commitment: "confirmed",
-    preflightCommitment: "confirmed",
-    skipPreflight: false,
-  });
-
-  const idl = PROGRAM_IDL as UndeadTypes;
-  const ephemeralProgram = new Program(idl, provider) as UndeadProgram;
-
-  return ephemeralProgram;
-};
-
-export const createERProvider = (wallet: any): AnchorProvider => {
-  const magicBlockConnection = createMagicBlockConnection();
-  const provider = new AnchorProvider(magicBlockConnection, wallet, {
-    commitment: "confirmed",
-    preflightCommitment: "confirmed",
-    skipPreflight: false,
-  });
-
-  return provider;
 };

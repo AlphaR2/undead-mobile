@@ -461,7 +461,7 @@ export type RustUndead = {
           name: "class";
           type: {
             defined: {
-              name: "warriorClass";
+              name: "WarriorClass";
             };
           };
         },
@@ -2689,10 +2689,10 @@ export type RustUndead = {
             type: "u16";
           },
           {
-            name: "warriorClass";
+            name: "WarriorClass";
             type: {
               defined: {
-                name: "warriorClass";
+                name: "WarriorClass";
               };
             };
           },
@@ -2919,7 +2919,7 @@ export type RustUndead = {
             name: "class";
             type: {
               defined: {
-                name: "warriorClass";
+                name: "WarriorClass";
               };
             };
           },
@@ -2959,7 +2959,7 @@ export type RustUndead = {
       };
     },
     {
-      name: "warriorClass";
+      name: "WarriorClass";
       type: {
         kind: "enum";
         variants: [

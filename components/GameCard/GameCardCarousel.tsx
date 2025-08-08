@@ -1,72 +1,109 @@
-import React, { useState, useContext } from "react";
 import { CreateContext } from "@/context/Context";
+import { guideImages, PERSONA_BACKGROUND } from "@/utils/assets";
+import React, { useContext, useState } from "react";
 import {
-  View,
-  Text,
   Image,
-  TouchableOpacity,
-  Dimensions,
-  StyleSheet,
-  PanResponder,
   ImageBackground,
+  PanResponder,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-
-const { width, height } = Dimensions.get("window");
-
-interface Character {
-  id: string;
-  name: string;
-  statRange: string;
-  description: string;
-  combatStyle: string;
-  image: string;
-}
-
-const characters: Character[] = [
-  {
-    id: "2",
-    name: "ORACLE",
-    description: "Mystical warrior with a Mega brain, lineage of Satoshi",
-    combatStyle: "High knowledge, moderate combat skills",
-    statRange: "High KNOW, Moderate ATK/DEF",
-    image:
-      "https://res.cloudinary.com/deensvquc/image/upload/v1753652714/Subtract_2_r9qtjm.png",
-  },
-  {
-    id: "3",
-    name: "MYSTRAL",
-    description: "Mystical warrior with a Mega brain, lineage of Satoshi",
-    combatStyle: "High knowledge, moderate combat skills",
-    statRange: "High KNOW, Moderate ATK/DEF",
-    image:
-      "https://res.cloudinary.com/deensvquc/image/upload/v1753652714/Subtract_1_zdw1kc.png",
-  },
-];
+import { WARRIOR_TYPES } from "../../types/mobile";
 
 const GameCardCarousel: React.FC = () => {
-  const { currentOnboardingScreen, setCurrentOnboardingScreen } =
-    useContext(CreateContext).onboarding;
+  const {
+    setCurrentOnboardingScreen,
+    selectedGuide,
+    playerName,
+    selectedPersona,
+    setSelectedWarriorType,
+  } = useContext(CreateContext).onboarding;
+
+  // Phase control: 'dialogue' or 'selection'
+  const [currentPhase, setCurrentPhase] = useState<"dialogue" | "selection">(
+    "dialogue"
+  );
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  // Background image
+
+  // Guide images mapping
+
+  // Get the guide image
+  const getGuideImage = (): string => {
+    if (selectedGuide?.id && guideImages[selectedGuide.id]) {
+      return guideImages[selectedGuide.id];
+    }
+    return "https://res.cloudinary.com/deensvquc/image/upload/v1753436774/Mask_group_ilokc7.png";
+  };
+
+  // Get guide name for speaking
+  const getGuideName = (): string => {
+    if (!selectedGuide?.name) return "Guide";
+
+    switch (selectedGuide.name) {
+      case "JANUS THE BUILDER":
+        return "Janus";
+      case "JAREK THE ORACLE":
+        return "Jarek";
+      case "GAIUS THE GUARDIAN":
+        return "Gaius";
+      case "BRYN THE DAEMON":
+        return "Bryn";
+      default:
+        return selectedGuide.name.split(" ")[0] || "Guide";
+    }
+  };
+
+  // Format persona for display
+  const formatPersonaName = (persona: string): string => {
+    return persona.replace(/([A-Z])/g, " $1").trim();
+  };
+
+  // Get personalized intro message
+  const getIntroMessage = (): string => {
+    const name = playerName || "Warrior";
+    const personaText = selectedPersona
+      ? ` as a ${formatPersonaName(selectedPersona)}`
+      : "";
+
+    return `${name}${personaText}, the ritual begins. You must now raise your first undead warrior from the essence of ancient powers. This cursed champion will embody your fighting spirit and supernatural gifts. Select wisely - your warrior's nature will shape every battle in the shadows that await.`;
+  };
+
+  const handleContinueToSelection = () => {
+    setCurrentPhase("selection");
+  };
+
   const handlePrevious = () => {
-    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : characters.length - 1));
+    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : WARRIOR_TYPES.length - 1));
   };
 
   const handleNext = () => {
-    setCurrentIndex((prev) => (prev < characters.length - 1 ? prev + 1 : 0));
+    setCurrentIndex((prev) => (prev < WARRIOR_TYPES.length - 1 ? prev + 1 : 0));
   };
 
   const handleConfirm = () => {
-    const selectedCharacter = characters[currentIndex];
+    const selectedWarrior = WARRIOR_TYPES[currentIndex];
+
+    console.log("Selected warrior type:", {
+      warrior: selectedWarrior.name,
+      player: playerName,
+      guide: selectedGuide?.name,
+      persona: selectedPersona,
+    });
+
+    // Save selected warrior to context
+    setSelectedWarriorType(selectedWarrior);
+
     setCurrentOnboardingScreen("warrior-setup");
-    console.log("Selected character:", selectedCharacter.name);
   };
 
   // Pan responder for swipe gestures
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
     onMoveShouldSetPanResponder: (evt, gestureState) => {
-      // Only respond to horizontal swipes
       return (
         Math.abs(gestureState.dx) > Math.abs(gestureState.dy) &&
         Math.abs(gestureState.dx) > 10
@@ -76,188 +113,322 @@ const GameCardCarousel: React.FC = () => {
       const swipeThreshold = 50;
 
       if (gestureState.dx > swipeThreshold) {
-        // Swipe right - go to previous character
         handlePrevious();
       } else if (gestureState.dx < -swipeThreshold) {
-        // Swipe left - go to next character
         handleNext();
       }
     },
   });
 
-  const getVisibleCharacters = () => {
-    const visibleChars = [];
+  const getVisibleWarriors = () => {
+    const visibleWarriors = [];
 
-    // Previous character (left side, smaller, darker)
+    // Previous warrior (left side, smaller, darker)
     const prevIndex =
-      currentIndex > 0 ? currentIndex - 1 : characters.length - 1;
-    visibleChars.push({
-      character: characters[prevIndex],
+      currentIndex > 0 ? currentIndex - 1 : WARRIOR_TYPES.length - 1;
+    visibleWarriors.push({
+      warrior: WARRIOR_TYPES[prevIndex],
       index: prevIndex,
       isActive: false,
     });
 
-    // Current character (right side, larger, active)
-    visibleChars.push({
-      character: characters[currentIndex],
+    // Current warrior (right side, larger, active)
+    visibleWarriors.push({
+      warrior: WARRIOR_TYPES[currentIndex],
       index: currentIndex,
       isActive: true,
     });
 
-    return visibleChars;
+    return visibleWarriors;
   };
 
-  const currentCharacter = characters[currentIndex];
+  const currentWarrior = WARRIOR_TYPES[currentIndex];
 
-  return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View className="h-[10%] w-full rounded-lg mt-1 flex flex-row gap-x-2 items-center text-wrap px-1 bg-[#CA742226]">
-        <Image
-          source={{
-            uri: "https://res.cloudinary.com/deensvquc/image/upload/v1753436774/Mask_group_ilokc7.png",
-          }}
-          resizeMode="contain"
-          className=" h-full w-[5%]"
-        />
+  // Phase 1: Guide Dialogue
+  if (currentPhase === "dialogue") {
+    return (
+      <ImageBackground
+        source={{ uri: PERSONA_BACKGROUND }}
+        style={styles.backgroundContainer}
+        resizeMode="cover"
+      >
+        <View style={styles.blackOverlay} />
 
-        <Text className="text-sm font-light text-wrap text-clip w-[85%]">
-          In this realm, your essence must be captured in a Sacred Game Card - a
-          magical artifact that proves your identity and holds your power.
-        </Text>
-      </View>
+        <View style={styles.container}>
+          {/* Centered dialogue */}
+          <View style={styles.centeredDialogueContainer}>
+            <View style={styles.dialogueCard}>
+              <Image
+                source={{ uri: getGuideImage() }}
+                resizeMode="contain"
+                style={styles.largeGuideImage}
+              />
 
-      <View style={styles.mainContent} className="mt-[50px] border-red-300 ">
-        {/* Left Side - Character Carousel */}
-        <View style={styles.charactersSection} className="w-[65%]">
-          {/* Navigation Arrows */}
-          <TouchableOpacity
-            style={[styles.navButton, styles.leftArrow]}
-            className="mt-28"
-            onPress={handlePrevious}
-          >
-            <Text style={styles.navButtonText}>‹</Text>
-          </TouchableOpacity>
+              <View style={styles.dialogueContent}>
+                <Text style={styles.guideName}>{getGuideName()}</Text>
+                <Text style={styles.centeredDialogueText}>
+                  {getIntroMessage()}
+                </Text>
 
-          {/* Characters Container */}
-          <View
-            style={styles.charactersContainer}
-            {...panResponder.panHandlers}
-            className="items-start"
-          >
-            {getVisibleCharacters().map(({ character, index, isActive }) => (
-              <View
-                key={character.id}
-                style={[
-                  styles.characterWrapper,
-                  isActive ? styles.activeCharacter : styles.inactiveCharacter,
-                ]}
-                className="overflow-visible"
-              >
-                <Image
-                  source={{ uri: character.image }}
-                  style={[
-                    styles.characterImage,
-                    isActive ? styles.activeImage : styles.inactiveImage,
-                  ]}
-                  resizeMode="contain"
-                  className="overflow-visible"
-                />
                 <TouchableOpacity
-                  className={`${isActive ? "flex" : "hidden"}  relative  z-40  mt-[-60px] `}
-                  onPress={handleConfirm}
+                  style={styles.continueButton}
+                  onPress={handleContinueToSelection}
                 >
                   <ImageBackground
                     source={{
                       uri: "https://res.cloudinary.com/deensvquc/image/upload/v1753433285/Frame_4_ppu88h.png",
                     }}
-                    className="absolute z-40  mt-[-40px] opacity-20 h-[200px] w-[200px]"
+                    style={styles.continueButtonBg}
                     resizeMode="contain"
                   >
-                    <Text className="  py-2 px-8 text-white  z-40 relative">
-                      Confirm
-                    </Text>
+                    <Text style={styles.continueButtonText}>Continue</Text>
                   </ImageBackground>
                 </TouchableOpacity>
               </View>
-            ))}
+            </View>
+          </View>
+        </View>
+      </ImageBackground>
+    );
+  }
+
+  // Phase 2: Warrior Selection
+  return (
+    <ImageBackground
+      source={{ uri: PERSONA_BACKGROUND }}
+      style={styles.backgroundContainer}
+      resizeMode="cover"
+    >
+      <View style={styles.blackOverlay} />
+
+      <View style={styles.container}>
+        {/* Header with smaller guide indicator */}
+        <View style={styles.smallDialogueContainer}>
+          <Image
+            source={{ uri: getGuideImage() }}
+            resizeMode="contain"
+            style={styles.smallGuideImage}
+          />
+          <Text style={styles.smallDialogueText}>
+            Choose your undead warrior, {playerName}
+          </Text>
+        </View>
+
+        <View style={styles.mainContent}>
+          {/* Left Side - Warrior Carousel */}
+          <View style={styles.charactersSection}>
+            {/* Navigation Arrows */}
+            <TouchableOpacity
+              style={[styles.navButton, styles.leftArrow]}
+              onPress={handlePrevious}
+            >
+              <Text style={styles.navButtonText}>‹</Text>
+            </TouchableOpacity>
+
+            {/* Warriors Container */}
+            <View
+              style={styles.charactersContainer}
+              {...panResponder.panHandlers}
+            >
+              {getVisibleWarriors().map(({ warrior, index, isActive }) => (
+                <View
+                  key={warrior.id}
+                  style={[
+                    styles.characterWrapper,
+                    isActive
+                      ? styles.activeCharacter
+                      : styles.inactiveCharacter,
+                  ]}
+                >
+                  <Image
+                    source={{ uri: warrior.image }}
+                    style={[
+                      styles.characterImage,
+                      isActive ? styles.activeImage : styles.inactiveImage,
+                    ]}
+                    resizeMode="contain"
+                  />
+
+                  {/* Confirm Button - Only show on active warrior */}
+                  {isActive && (
+                    <TouchableOpacity
+                      style={styles.confirmButtonContainer}
+                      onPress={handleConfirm}
+                    >
+                      <ImageBackground
+                        source={{
+                          uri: "https://res.cloudinary.com/deensvquc/image/upload/v1753433285/Frame_4_ppu88h.png",
+                        }}
+                        style={styles.confirmButtonBg}
+                        resizeMode="contain"
+                      >
+                        <Text style={styles.confirmButtonText}>
+                          Choose the {warrior.name}
+                        </Text>
+                      </ImageBackground>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              ))}
+            </View>
+
+            <TouchableOpacity
+              style={[styles.navButton, styles.rightArrow]}
+              onPress={handleNext}
+            >
+              <Text style={styles.navButtonText}>›</Text>
+            </TouchableOpacity>
           </View>
 
-          <TouchableOpacity
-            style={[styles.navButton, styles.rightArrow]}
-            onPress={handleNext}
-            className="mt-28"
-          >
-            <Text style={styles.navButtonText}>›</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Right Side - Character Info Card */}
-        <View className="ml-auto w-[30%]">
-          <ImageBackground
-            source={{
-              uri: "https://res.cloudinary.com/deensvquc/image/upload/v1753427362/Group_1_khuulp.png",
-            }}
-            // style={styles.background}
-            className=""
-            resizeMode="contain"
-          >
-            <View style={styles.infoCard}>
-              <Text style={styles.characterName}>{currentCharacter.name}</Text>
-              <Text className="text-sm text-white font-light">
-                {currentCharacter.description}
-              </Text>
-
-              <View>
-                <Text className="text-white font-medium">Combat Style:</Text>
-                <Text className="text-sm flex flex-col text-white font-light">
-                  {currentCharacter.description}
+          {/* Right Side - Warrior Info Card */}
+          <View style={styles.infoSection}>
+            <ImageBackground
+              source={{
+                uri: "https://res.cloudinary.com/deensvquc/image/upload/v1753427362/Group_1_khuulp.png",
+              }}
+              style={styles.infoCardBg}
+              resizeMode="contain"
+            >
+              <View style={styles.infoCard}>
+                <Text
+                  style={[styles.warriorName, { color: currentWarrior.color }]}
+                >
+                  {currentWarrior.name}
                 </Text>
-              </View>
 
-              <View>
-                <Text className="text-white font-medium">Stat Range:</Text>
-                <Text className="text-sm flex flex-col text-white font-light">
-                  {currentCharacter.statRange}
-                </Text>
+                <View style={styles.infoSectionItem}>
+                  <Text style={styles.infoLabel}>Combat Style:</Text>
+                  <Text style={styles.infoText}>
+                    {currentWarrior.combatStyle}
+                  </Text>
+                </View>
+
+                <View style={styles.infoSectionItem}>
+                  <Text style={styles.infoLabel}>Stat Range:</Text>
+                  <Text style={styles.infoText}>
+                    {currentWarrior.statRange}
+                  </Text>
+                </View>
+
+                <View style={styles.infoSectionItem}>
+                  <Text style={styles.infoLabel}>Specialty:</Text>
+                  <Text style={styles.infoText}>
+                    {currentWarrior.specialty}
+                  </Text>
+                </View>
               </View>
-            </View>
-          </ImageBackground>
+            </ImageBackground>
+          </View>
         </View>
-        <View></View>
       </View>
-
-      {/* Confirm Button */}
-    </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  backgroundContainer: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
+  blackOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+  },
   container: {
     flex: 1,
-    // backgroundColor: '#1a1a1a',
-    // paddingTop: 60,
-    // paddingBottom: 40,
+    paddingHorizontal: 12,
+  },
+
+  // Phase 1 - Dialogue styles
+  centeredDialogueContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 20,
   },
-  headerText: {
-    color: "#D4AF37",
-    fontSize: 18,
+  dialogueCard: {
+    backgroundColor: "rgba(202, 116, 34, 0.9)",
+    borderRadius: 20,
+    padding: 30,
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#CA7422",
+    maxWidth: 400,
+    minHeight: 300,
+  },
+  largeGuideImage: {
+    width: 80,
+    height: 80,
+    marginBottom: 20,
+  },
+  dialogueContent: {
+    alignItems: "center",
+  },
+  guideName: {
+    color: "#FFFFFF",
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 15,
     textAlign: "center",
-    // marginBottom: 40,
+  },
+  centeredDialogueText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    lineHeight: 22,
+    textAlign: "center",
+    marginBottom: 25,
+  },
+  continueButton: {
+    alignItems: "center",
+  },
+  continueButtonBg: {
+    width: 140,
+    height: 60,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  continueButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+
+  // Phase 2 - Selection styles
+  smallDialogueContainer: {
+    width: "100%",
+    height: 50,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(202, 116, 34, 0.8)",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 3,
+    borderWidth: 1,
+    borderColor: "rgba(202, 116, 34, 0.3)",
+  },
+  smallGuideImage: {
+    width: 35,
+    height: 35,
+    marginRight: 12,
+  },
+  smallDialogueText: {
+    color: "#FFFFFF",
+    fontSize: 14,
     fontWeight: "500",
   },
   mainContent: {
-    // flex: 1,
+    flex: 1,
     flexDirection: "row",
     alignItems: "flex-start",
     justifyContent: "space-between",
   },
   charactersSection: {
-    // flex: 0.6,
+    width: "65%",
     flexDirection: "row",
-    alignItems: "flex-start",
-    height: "100%",
+    alignItems: "center",
+    height: 400,
     justifyContent: "center",
   },
   leftArrow: {
@@ -288,9 +459,7 @@ const styles = StyleSheet.create({
   charactersContainer: {
     flex: 1,
     flexDirection: "row",
-    // alignItems: "center",
     justifyContent: "space-around",
-    height: 400,
     paddingHorizontal: 20,
   },
   characterWrapper: {
@@ -301,19 +470,16 @@ const styles = StyleSheet.create({
     // Current character styling
   },
   inactiveCharacter: {
-    // Previous character styling
     opacity: 0.5,
   },
   characterImage: {
-    // borderRadius: 15,
-    // borderWidth: 2,
-    // borderColor: "#D4AF37",
+    // Base image styles
   },
   activeImage: {
-    display: "flex",
-    width: 150,
-    height: 250,
+    width: 200,
+    height: 200,
     borderColor: "#D4AF37",
+    marginBottom: 32,
   },
   inactiveImage: {
     width: 120,
@@ -321,28 +487,42 @@ const styles = StyleSheet.create({
     marginTop: 20,
     borderColor: "rgba(212, 175, 55, 0.5)",
   },
-
-  infoCard: {
-    // backgroundColor: "rgba(139, 69, 19, 0.95)",
-    // borderRadius: 15,
-    padding: 30,
-    // borderWidth: 3,
-    minWidth: "100%",
-    minHeight: 250,
-    justifyContent: "space-between",
-    // Custom border styling to match the ornate look
-    // shadowColor: "#D4AF37",
-    shadowOffset: {
-      width: 0,
-      height: 0,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 8,
+  confirmButtonContainer: {
+    marginTop: -40,
+    alignItems: "center",
+    backgroundColor: "rgba(202, 116, 34, 0.8)",
+    width: 140,
+    height: 39,
+    justifyContent: "center",
+    borderRadius: 19
   },
-  characterName: {
+  confirmButtonBg: {
+    width: 140,
+    height: 60,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  confirmButtonText: {
     color: "#FFFFFF",
-    fontSize: 15,
+    fontSize: 12,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  infoSection: {
+    width: "30%",
+  },
+  infoCardBg: {
+    width: "100%",
+    minHeight: 350,
+  },
+  infoCard: {
+    padding: 20,
+    minHeight: 330,
+    gap: 12,
+    // justifyContent: "space-between",
+  },
+  warriorName: {
+    fontSize: 20,
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 8,
@@ -350,55 +530,47 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
-  characterTitle: {
-    color: "#D4AF37",
-    fontSize: 16,
-    textAlign: "center",
-    marginBottom: 20,
-    fontWeight: "600",
-  },
-  characterDescription: {
+  warriorTitle: {
     color: "#FFFFFF",
-    fontSize: 10,
-    lineHeight: 10,
+    fontSize: 14,
+    fontWeight: "600",
+    textAlign: "center",
+    marginBottom: 15,
+    opacity: 0.9,
+  },
+  warriorDescription: {
+    color: "#FFFFFF",
+    fontSize: 13,
+    lineHeight: 18,
     textAlign: "left",
-    marginBottom: 20,
+    marginBottom: 16,
     fontStyle: "italic",
   },
-  recommendedSection: {
-    marginTop: "auto",
+  infoSectionItem: {
+    marginBottom: 12,
   },
-  recommendedLabel: {
-    color: "#D4AF37",
+  infoLabel: {
+    color: "#CA7422",
     fontSize: 14,
     fontWeight: "bold",
-    marginBottom: 5,
+    marginBottom: 4,
   },
-  recommendedText: {
+  infoText: {
     color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "500",
+    fontSize: 13,
+    lineHeight: 16,
   },
-  confirmButton: {
-    backgroundColor: "#CD853F",
-    borderRadius: 8,
-    // paddingVertical: 15,
-    // paddingHorizontal: 40,
-    alignSelf: "center",
-    // marginTop: 30,
-    display: "absolute",
-    borderWidth: 2,
-    borderColor: "#D4AF37",
-    minWidth: 120,
+  compatibilitySection: {
+    marginTop: 8,
+    padding: 8,
+    backgroundColor: "rgba(202, 116, 34, 0.2)",
+    borderRadius: 6,
+    borderWidth: 1,
   },
-  confirmButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "center",
-    textShadowColor: "#000",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 1,
+  compatibilityText: {
+    fontSize: 12,
+    fontWeight: "600",
+    fontStyle: "italic",
   },
 });
 
