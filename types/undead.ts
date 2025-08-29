@@ -26,6 +26,50 @@ export enum ImageRarity {
   Rare = "rare",
 }
 
+// Warrior class information for UI
+export const WARRIOR_CLASS_INFO = {
+  [WarriorClass.Validator]: {
+    title: "Validator",
+    icon: "⚖️",
+    description: "The undead Warrior of network consensus",
+    traits: "Well-rounded combat capabilities",
+    statDistribution: "Balanced ATK/DEF/KNOW",
+    specialAbility: "Consensus Strike - Balanced damage output",
+    lore: "Masters of network validation and Byzantine fault tolerance",
+    image: "/warrior/validator-original.png",
+  },
+  [WarriorClass.Oracle]: {
+    title: "Oracle",
+    icon: "🔮",
+    description: "Mystical warrior with a Mega brain, lineage of Satoshi",
+    traits: "High knowledge, moderate combat skills",
+    statDistribution: "High KNOW, Moderate ATK/DEF",
+    specialAbility: "Data Feed - Enhanced knowledge-based attacks and defense",
+    lore: "These warriors knew about the birth of blockchain and cryptography",
+    image: "/warrior/oracle-original.png",
+  },
+  [WarriorClass.Guardian]: {
+    title: "Guardian",
+    icon: "🛡️",
+    description: "Stalwart defenders of the blockchain realm",
+    traits: "Exceptional defense, moderate attack",
+    statDistribution: "High DEF, Moderate ATK/KNOW",
+    specialAbility: "Shield Wall - Superior defensive capabilities",
+    lore: "Protectors who secure the network from all threats and hacks",
+    image: "/warrior/guardian-original.png",
+  },
+  [WarriorClass.Daemon]: {
+    title: "Daemon",
+    icon: "⚡",
+    description: "Aggressive background processes of destruction",
+    traits: "High attack, low defense - glass cannon",
+    statDistribution: "High ATK, Low DEF, Moderate KNOW",
+    specialAbility: "Process Kill - Devastating but risky attacks",
+    lore: "Relentless background warriors optimized for raw damage",
+    image: "/warrior/daemon-original.png",
+  },
+};
+
 // Battle State
 export enum BattleState {
   Created = "created",
@@ -250,7 +294,7 @@ export interface Warrior {
   imageRarity: ImageRarity | any;
   imageIndex: number;
   imageUri: string;
-  isOnCooldown: boolean;
+  isOnCooldown?: boolean;
   address: PublicKey;
 }
 
@@ -318,6 +362,94 @@ export interface Leaderboard {
   topScores: number[];
   lastUpdated: BN;
 }
+
+export interface BattleMainState {
+  currentQuestionIndex: number;
+  myScore: number;
+  opponentScore: number;
+  myCurrentHP: number;
+  myMaxHP: number;
+  opponentCurrentHP: number;
+  opponentMaxHP: number;
+  battlePhase: "learning" | "pressure" | "deadly";
+  turnTimeLeft: number;
+  gameOver: boolean;
+  winner: string | null;
+  myAnswerSubmitted: boolean;
+  opponentAnswerSubmitted: boolean;
+  bothAnswersSubmitted: boolean;
+  canSubmitAnswer: boolean;
+  waitingForNextQuestion: boolean;
+}
+
+export interface WarriorInfo {
+  name: string;
+  address: string;
+  player: string;
+  imageUri?: string;
+  level?: number;
+  baseAttack?: number;
+  baseDefense?: number;
+  baseKnowledge?: number;
+  currentHp?: number;
+  maxHp?: number;
+  warriorClass?: any;
+  battlesWon?: number;
+  battlesLost?: number;
+}
+
+export type SettlementStep =
+  | "initial"
+  | "settling"
+  | "undelegating_room"
+  | "undelegating_player"
+  | "finalizing"
+  | "complete"
+  | "error";
+
+export type StepStatus =
+  | "pending"
+  | "processing"
+  | "completed"
+  | "failed"
+  | "skipped";
+
+export interface SettlementState {
+  currentStep: SettlementStep;
+  stepStatuses: Record<string, StepStatus>;
+  progress: number;
+  error: string | null;
+  retryCount: number;
+  canRetry: boolean;
+  isProcessing: boolean;
+}
+
+export interface BattleQuestion {
+  text: string;
+  answer: boolean;
+}
+
+export interface BattleQuizProps {
+  battleRoomPda: string;
+  roomIdBytes: Uint8Array;
+  onExit?: () => void;
+}
+
+export interface FinalBattleScores {
+  myScore: number;
+  opponentScore: number;
+  myHP: number;
+  opponentHP: number;
+}
+
+// Constants
+export const BATTLE_TIMER_DURATION = 120;
+
+export const PHASE_CONFIGS = {
+  learning: { color: "text-green-400", icon: "🎓", damageRange: [4, 8] },
+  pressure: { color: "text-yellow-400", icon: "⚡", damageRange: [6, 12] },
+  deadly: { color: "text-red-400", icon: "💀", damageRange: [10, 18] },
+} as const;
 
 // Type guards for better type safety
 export const isWarriorClass = (value: string): value is WarriorClass => {

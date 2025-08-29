@@ -17,9 +17,12 @@ export type RustUndead = {
       discriminator: [86, 3, 30, 143, 53, 98, 98, 243];
       accounts: [
         {
-          name: "player";
+          name: "signer";
           writable: true;
           signer: true;
+        },
+        {
+          name: "player";
         },
         {
           name: "battleRoom";
@@ -44,6 +47,10 @@ export type RustUndead = {
         {
           name: "defenderWarrior";
           writable: true;
+        },
+        {
+          name: "sessionToken";
+          optional: true;
         },
         {
           name: "magicProgram";
@@ -104,9 +111,12 @@ export type RustUndead = {
       discriminator: [234, 61, 97, 187, 97, 170, 101, 141];
       accounts: [
         {
-          name: "player";
+          name: "signer";
           writable: true;
           signer: true;
+        },
+        {
+          name: "player";
         },
         {
           name: "battleRoom";
@@ -132,6 +142,14 @@ export type RustUndead = {
           name: "warriorB";
           writable: true;
           optional: true;
+        },
+        {
+          name: "sessionToken";
+          optional: true;
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
         },
       ];
       args: [
@@ -149,9 +167,12 @@ export type RustUndead = {
       discriminator: [12, 106, 206, 38, 255, 165, 78, 227];
       accounts: [
         {
-          name: "player";
+          name: "signer";
           writable: true;
           signer: true;
+        },
+        {
+          name: "player";
         },
         {
           name: "battleRoom";
@@ -178,6 +199,14 @@ export type RustUndead = {
           writable: true;
           optional: true;
         },
+        {
+          name: "sessionToken";
+          optional: true;
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
+        },
       ];
       args: [
         {
@@ -193,9 +222,12 @@ export type RustUndead = {
       discriminator: [58, 179, 128, 246, 115, 154, 79, 95];
       accounts: [
         {
-          name: "playerA";
+          name: "signer";
           writable: true;
           signer: true;
+        },
+        {
+          name: "playerA";
         },
         {
           name: "warriorA";
@@ -249,6 +281,10 @@ export type RustUndead = {
           };
         },
         {
+          name: "sessionToken";
+          optional: true;
+        },
+        {
           name: "systemProgram";
           address: "11111111111111111111111111111111";
         },
@@ -295,9 +331,12 @@ export type RustUndead = {
       discriminator: [163, 157, 34, 175, 170, 146, 80, 103];
       accounts: [
         {
-          name: "player";
+          name: "signer";
           writable: true;
           signer: true;
+        },
+        {
+          name: "player";
         },
         {
           name: "authority";
@@ -423,6 +462,10 @@ export type RustUndead = {
           address: "Cuj97ggrhhidhbu39TijNVqE74xvKJ69gDervRUXAxGh";
         },
         {
+          name: "sessionToken";
+          optional: true;
+        },
+        {
           name: "systemProgram";
           address: "11111111111111111111111111111111";
         },
@@ -461,7 +504,7 @@ export type RustUndead = {
           name: "class";
           type: {
             defined: {
-              name: "WarriorClass";
+              name: "warriorClass";
             };
           };
         },
@@ -906,6 +949,10 @@ export type RustUndead = {
           };
         },
         {
+          name: "sessionToken";
+          optional: true;
+        },
+        {
           name: "ownerProgram";
           address: "HYHburusRpKcHxcMrrE2oh9DgysGpfpJTeDMDHuTf4Q9";
         },
@@ -1069,9 +1116,12 @@ export type RustUndead = {
       discriminator: [96, 155, 69, 190, 105, 208, 17, 32];
       accounts: [
         {
-          name: "playerB";
+          name: "signer";
           writable: true;
           signer: true;
+        },
+        {
+          name: "playerB";
         },
         {
           name: "warriorB";
@@ -1123,6 +1173,10 @@ export type RustUndead = {
               },
             ];
           };
+        },
+        {
+          name: "sessionToken";
+          optional: true;
         },
       ];
       args: [
@@ -1200,6 +1254,10 @@ export type RustUndead = {
           writable: true;
         },
         {
+          name: "sessionToken";
+          optional: true;
+        },
+        {
           name: "magicProgram";
           address: "Magic11111111111111111111111111111111111111";
         },
@@ -1223,9 +1281,12 @@ export type RustUndead = {
       discriminator: [96, 49, 44, 123, 65, 227, 168, 32];
       accounts: [
         {
-          name: "player";
+          name: "signer";
           writable: true;
           signer: true;
+        },
+        {
+          name: "player";
         },
         {
           name: "battleRoom";
@@ -1286,6 +1347,10 @@ export type RustUndead = {
           name: "warriorB";
           writable: true;
         },
+        {
+          name: "sessionToken";
+          optional: true;
+        },
       ];
       args: [
         {
@@ -1332,6 +1397,10 @@ export type RustUndead = {
         {
           name: "warriorB";
           writable: true;
+        },
+        {
+          name: "sessionToken";
+          optional: true;
         },
         {
           name: "magicProgram";
@@ -1386,6 +1455,10 @@ export type RustUndead = {
           writable: true;
         },
         {
+          name: "sessionToken";
+          optional: true;
+        },
+        {
           name: "magicProgram";
           address: "Magic11111111111111111111111111111111111111";
         },
@@ -1416,6 +1489,14 @@ export type RustUndead = {
         {
           name: "warriorA";
           writable: true;
+        },
+        {
+          name: "sessionToken";
+          optional: true;
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
         },
         {
           name: "magicProgram";
@@ -1452,6 +1533,10 @@ export type RustUndead = {
         {
           name: "warriorB";
           writable: true;
+        },
+        {
+          name: "sessionToken";
+          optional: true;
         },
         {
           name: "magicProgram";
@@ -1500,6 +1585,10 @@ export type RustUndead = {
               },
             ];
           };
+        },
+        {
+          name: "sessionToken";
+          optional: true;
         },
         {
           name: "magicProgram";
@@ -1718,6 +1807,10 @@ export type RustUndead = {
             ];
           };
         },
+        {
+          name: "sessionToken";
+          optional: true;
+        },
       ];
       args: [
         {
@@ -1733,9 +1826,12 @@ export type RustUndead = {
       discriminator: [121, 136, 149, 135, 219, 62, 236, 55];
       accounts: [
         {
-          name: "player";
+          name: "signer";
           writable: true;
           signer: true;
+        },
+        {
+          name: "player";
         },
         {
           name: "userRegistry";
@@ -1797,6 +1893,10 @@ export type RustUndead = {
           };
         },
         {
+          name: "sessionToken";
+          optional: true;
+        },
+        {
           name: "systemProgram";
           address: "11111111111111111111111111111111";
         },
@@ -1829,6 +1929,10 @@ export type RustUndead = {
     {
       name: "leaderboard";
       discriminator: [247, 186, 238, 243, 194, 30, 9, 36];
+    },
+    {
+      name: "sessionToken";
+      discriminator: [233, 4, 115, 14, 46, 21, 1, 15];
     },
     {
       name: "undeadWarrior";
@@ -2642,6 +2746,30 @@ export type RustUndead = {
       };
     },
     {
+      name: "sessionToken";
+      type: {
+        kind: "struct";
+        fields: [
+          {
+            name: "authority";
+            type: "pubkey";
+          },
+          {
+            name: "targetProgram";
+            type: "pubkey";
+          },
+          {
+            name: "sessionSigner";
+            type: "pubkey";
+          },
+          {
+            name: "validUntil";
+            type: "i64";
+          },
+        ];
+      };
+    },
+    {
       name: "undeadWarrior";
       type: {
         kind: "struct";
@@ -2689,10 +2817,10 @@ export type RustUndead = {
             type: "u16";
           },
           {
-            name: "WarriorClass";
+            name: "warriorClass";
             type: {
               defined: {
-                name: "WarriorClass";
+                name: "warriorClass";
               };
             };
           },
@@ -2919,7 +3047,7 @@ export type RustUndead = {
             name: "class";
             type: {
               defined: {
-                name: "WarriorClass";
+                name: "warriorClass";
               };
             };
           },
@@ -2959,7 +3087,7 @@ export type RustUndead = {
       };
     },
     {
-      name: "WarriorClass";
+      name: "warriorClass";
       type: {
         kind: "enum";
         variants: [

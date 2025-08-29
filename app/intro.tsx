@@ -1,4 +1,5 @@
-import { WalletSelectionModal } from "@/components/modal/WalletSelectionModal";
+
+import { WalletSelectionModal } from "@/components/modal/Walletselectionmodal";
 import { toast } from "@/components/ui/Toast";
 import { GameFonts } from "@/constants/GameFonts";
 import { useMWA } from "@/context/mwa";

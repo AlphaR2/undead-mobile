@@ -1,27 +1,27 @@
-import { RustUndead as UndeadTypes } from "@/types/idlTypes";
-import * as anchor from "@coral-xyz/anchor";
 import { Connection } from "@solana/web3.js";
+import * as anchor from "@coral-xyz/anchor";
 import { PROGRAM_IDL } from "../config/program";
+import { RustUndead as UndeadTypes } from "@/types/idlTypes";
 import {
-  AnswerRevealEvent,
-  AnswerSubmitEvent,
-  BattleRoomCancelled,
-  BattleStart,
-  DamageEvent,
-  DelegationEvent,
-  EliminationEvent,
-  EventHistoryItem,
+  GameEventHandlers,
   EventListenerConfig,
   EventListenerStatus,
-  GameEventHandlers,
-  JoinEvent,
-  NextEvent,
-  ReadyEvent,
-  ScoresEvent,
-  WarriorCreatedEvent,
+  EventHistoryItem,
+  BattleRoomCancelled,
   WarriorReleased,
+  DelegationEvent,
+  JoinEvent,
+  ReadyEvent,
+  BattleStart,
   WarriorStatusEvent,
   WinnerEvent,
+  AnswerSubmitEvent,
+  AnswerRevealEvent,
+  ScoresEvent,
+  DamageEvent,
+  EliminationEvent,
+  NextEvent,
+  WarriorCreatedEvent,
 } from "../types/events";
 
 export class SolanaEventListener {
@@ -40,8 +40,8 @@ export class SolanaEventListener {
   private eventHistory: EventHistoryItem[] = [];
 
   // Enhanced connection management
-  private reconnectTimeout: number | null = null;
-  private healthCheckInterval: number | null = null;
+  private reconnectTimeout: NodeJS.Timeout | null = null;
+  private healthCheckInterval: NodeJS.Timeout | null = null;
   private isDestroyed: boolean = false;
   private connectionAttempts: number = 0;
   private lastHealthCheck: number = 0;

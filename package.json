@@ -11,7 +11,7 @@
     "lint": "expo lint"
   },
   "dependencies": {
-    "@coral-xyz/anchor": "^0.28.0",
+    "@coral-xyz/anchor": "^0.31.1",
     "@dynamic-labs/client": "^4.25.9",
     "@dynamic-labs/react-hooks": "^4.25.9",
     "@dynamic-labs/react-native-extension": "^4.25.9",
@@ -21,6 +21,7 @@
     "@expo/config-plugins": "~10.1.1",
     "@expo/vector-icons": "^14.1.0",
     "@magicblock-labs/ephemeral-rollups-sdk": "^0.2.5",
+    "@magicblock-labs/gum-react-sdk": "^3.0.8",
     "@react-native-async-storage/async-storage": "2.1.2",
     "@react-native-vector-icons/material-icons": "^12.1.0",
     "@react-navigation/bottom-tabs": "^7.3.10",

@@ -50,9 +50,9 @@ export class MagicBlockEventListener {
   private eventHistory: EventHistoryItem[] = [];
 
   // Enhanced connection management
-  private reconnectTimeout: number | null = null;
-  private healthCheckInterval: number | null = null;
-  private battlePollingInterval: number | null = null;
+  private reconnectTimeout: NodeJS.Timeout | null = null;
+  private healthCheckInterval: NodeJS.Timeout | null = null;
+  private battlePollingInterval: NodeJS.Timeout | null = null;
   private isDestroyed: boolean = false;
   private connectionAttempts: number = 0;
   private lastHealthCheck: number = 0;
@@ -354,11 +354,11 @@ export class MagicBlockEventListener {
         const signature = data.params?.result?.signature;
         const logs = data.params?.result?.value?.logs || [];
 
-        console.log("📋 [ER] Log notification received:", {
-          signature,
-          logCount: logs.length,
-          firstLog: logs[0],
-        });
+        // console.log("📋 [ER] Log notification received:", {
+        //   signature,
+        //   logCount: logs.length,
+        //   firstLog: logs[0],
+        // });
 
         // Store raw logs for debugging
         this.debugLogs.push({
@@ -978,7 +978,7 @@ export class MagicBlockEventListener {
 
     // Use same environment variables as your existing MagicBlock setup
     const httpEndpoint =
-      process.env.EXPO_PUBLIC_ER_PROVIDER_ENDPOINT ||
+      process.env.NEXT_PUBLIC_ER_PROVIDER_ENDPOINT ||
       "https://devnet.magicblock.app/";
 
     // console.log("🔮 MagicBlock HTTP endpoint:", httpEndpoint);
@@ -991,7 +991,7 @@ export class MagicBlockEventListener {
     }
 
     const wsEndpoint =
-      process.env.EXPO_PUBLIC_ER_WS_ENDPOINT || "wss://devnet.magicblock.app/";
+      process.env.NEXT_PUBLIC_ER_WS_ENDPOINT || "wss://devnet.magicblock.app/";
 
     // console.log("🔮 MagicBlock WebSocket endpoint:", wsEndpoint);
     return wsEndpoint;

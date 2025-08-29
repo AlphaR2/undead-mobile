@@ -1,4 +1,3 @@
-import "@getpara/react-native-wallet/shim";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { Toast } from "@/components/ui/Toast";
 import { MWAProvider } from "@/context/mwa";
@@ -35,14 +34,6 @@ export default function RootLayout() {
     "UnifrakturCook-Bold": require("../assets/fonts/UnifrakturCook-Bold.ttf"),
   });
 
-  // Get Privy configuration from environment variables
-  const privyAppId =
-    Constants.expoConfig?.extra?.privyAppId ||
-    process.env.EXPO_PUBLIC_PRIVY_APP_ID;
-  const privyClientId =
-    Constants.expoConfig?.extra?.privyClientId ||
-    process.env.EXPO_PUBLIC_PRIVY_CLIENT_ID;
-
   useEffect(() => {
     if (fontsLoaded) {
       // Hide the splash screen once fonts are loaded
@@ -51,26 +42,8 @@ export default function RootLayout() {
   }, [fontsLoaded]);
 
   // Add error handling for missing Privy configuration
-  useEffect(() => {
-    if (!privyAppId) {
-      console.error(
-        "Privy App ID is missing. Please check your environment variables."
-      );
-    }
-    if (!privyClientId) {
-      console.error(
-        "Privy Client ID is missing. Please check your environment variables."
-      );
-    }
-  }, [privyAppId, privyClientId]);
 
   if (!fontsLoaded) {
-    return null;
-  }
-
-  // Don't render if essential Privy config is missing
-  if (!privyAppId || !privyClientId) {
-    console.error("Missing required Privy configuration");
     return null;
   }
 
